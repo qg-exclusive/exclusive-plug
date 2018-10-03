@@ -2,6 +2,7 @@ package com.qg.exclusiveplug.dao;
 
 import com.qg.exclusiveplug.model.Device;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -28,5 +29,5 @@ public interface DeviceMapper {
      * @param date 时间点
      * @return 一系列时间块的用电量
      */
-    List<Device> listPowerSum(List<String> date);
+    List<Device> listPowerSum(@Param("index") int index, @Param("data") List<String> date);
 }
