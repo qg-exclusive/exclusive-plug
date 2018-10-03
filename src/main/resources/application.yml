@@ -1,0 +1,54 @@
+# Druid 配置
+spring:
+  profiles:
+    active: test
+  # Redis 配置
+  redis:
+    database: 0
+    host: 119.29.253.167
+    port: 6379
+    password:
+    jedis:
+      pool:
+        max-active: 300
+        max-wait: -1
+        max-idle: 8
+        min-idle: 0
+    timeout: 0
+
+  devtools:
+    restart:
+      enabled: true
+      exclude: WEB-INF/**
+
+  servlet:
+    multipart:
+      max-file-size: 100Mb
+      max-request-size: 1000Mb
+
+# MyBatis 配置
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.qg.exclusiveplug.model
+  configuration.map-underscore-to-camel-case: true
+
+
+#Netty 配置
+netty:
+  tcp-port: 8090
+  boss-count: 1
+  worker-count: 10
+  keep-alive: true
+  backlog: 100
+
+#阿里云短信配置
+aliyun:
+  sms:
+    accessKeyId: LTAIAU2HSahyGWkS
+    accessKeySecret: OG4kUcuHwjYVuXbP3OBWurSBjb3S5s
+    product: Dysmsapi
+    domain: dysmsapi.aliyuncs.com
+    regionId: cn-hangzhou
+    signName: OnlineZuozuo
+    dateFormat: yyyy-MM-dd
+    endpointName: cn-hangzhou
