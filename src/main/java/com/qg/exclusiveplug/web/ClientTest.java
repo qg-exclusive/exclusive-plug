@@ -20,15 +20,16 @@ public class ClientTest {
         String line;
 
         // 2、获取 Socket 流中输入流
-        OutputStream out = socket.getOutputStream();
-
-        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(out));
+        BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
         while(null != (line = bufferedReader.readLine())){
             log.info(line);
             // 3、使用输出流将指定的数据写出去
             bufferedWriter.write(line);
         }
+
+        BufferedReader bufferedReader1 = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        System.out.println(bufferedReader1.readLine());
 
         // 4、关闭 Socket 服务
         socket.close();

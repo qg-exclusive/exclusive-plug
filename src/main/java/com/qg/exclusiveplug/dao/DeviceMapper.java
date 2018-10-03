@@ -26,9 +26,11 @@ public interface DeviceMapper {
     int saveDevices(List<Device> devices);
 
     /**
-     * 取得一系列时间块的用电量
-     * @param date 时间点
-     * @return 一系列时间块的用电量
+     * 取得某串口某时间段内的总用电量
+     * @param index 串口号
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 某串口某时间段内的总用电量
      */
-    List<Device> listPowerSum(List<String> date);
+    Double listPowerSum(@Param("index") int index, @Param("startTime") String startTime, @Param("endTime") String endTime);
 }

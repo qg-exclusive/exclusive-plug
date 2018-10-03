@@ -12,5 +12,8 @@ public class ResponseData {
      */
     String status;
 
+    /**
+     * 数据
+     */
     Data data;
 }

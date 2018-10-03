@@ -19,4 +19,9 @@ public class Data {
      * 设备状态
      */
     int status;
+
+    /**
+     * 用电量
+     */
+    Double[] powerSums;
 }
