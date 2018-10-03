@@ -3,6 +3,7 @@ package com.qg.exclusiveplug.handlers;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import lombok.Data;
@@ -35,5 +36,6 @@ public class StringProtocolHandler extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(stringDecoder);
         pipeline.addLast(stringEncoder);
         pipeline.addLast(tcpHandler);
+        pipeline.addLast(new LineBasedFrameDecoder(1024));
     }
 }

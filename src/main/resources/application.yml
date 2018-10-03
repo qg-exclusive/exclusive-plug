@@ -51,3 +51,5 @@ netty:
   keep-alive: true
   backlog: 100
 
+logging:
+  file: /root/exclusive_plug/mylog.log
