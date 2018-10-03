@@ -9,6 +9,11 @@ public enum Status {
      */
     NORMAL("2000"),
 
+    /**
+     * 参数解析错误
+     */
+    PARAMETER_ERROR("4003"),
+
     PREDICTED_FAILED("5001")
     ;
 

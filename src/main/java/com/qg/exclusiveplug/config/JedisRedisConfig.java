@@ -14,7 +14,7 @@ import redis.clients.jedis.JedisPoolConfig;
  * motto : everything is no in vain
  * description Jedis 配置信息
  */
-@Configuration
+//@Configuration
 public class JedisRedisConfig {
     @Value("${spring.redis.host}")
     private String host;

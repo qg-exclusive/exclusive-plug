@@ -1,15 +1,21 @@
-package com.qg.exclusiveplug.web;
+package com.qg.exclusiveplug;
 
-import com.sun.istack.internal.Interned;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.io.*;
-import java.net.InetAddress;
 import java.net.Socket;
 
 @Slf4j
+@RunWith(SpringRunner.class)
+@SpringBootTest
 public class ClientTest {
-    public static void main(String[] args) throws IOException {
+
+    @Test
+    public void test() throws IOException {
         // 1、创建客户端的 Socket 服务
         Socket socket = new Socket("127.0.0.1", 8090);
 

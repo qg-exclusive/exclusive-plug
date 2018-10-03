@@ -3,6 +3,9 @@ package com.qg.exclusiveplug.service;
 import org.springframework.web.multipart.MultipartFile;
 
 
+/**
+ * @author Wilder
+ */
 public interface DataService {
     /**
      * 将某电器在某一天的总用电量存入数据库
