@@ -22,4 +22,11 @@ public interface DeviceMapper {
      * @return  插入结果
      */
     int saveDevices(List<Device> devices);
+
+    /**
+     * 取得一系列时间块的用电量
+     * @param date 时间点
+     * @return 一系列时间块的用电量
+     */
+    List<Device> listPowerSum(List<String> date);
 }

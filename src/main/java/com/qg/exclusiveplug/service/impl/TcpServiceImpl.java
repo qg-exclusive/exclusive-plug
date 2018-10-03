@@ -6,12 +6,17 @@ import com.qg.exclusiveplug.model.Device;
 import com.qg.exclusiveplug.service.TcpService;
 import com.qg.exclusiveplug.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
-import redis.clients.jedis.Jedis;
+import com.qg.exclusiveplug.dtos.Data;
+import com.qg.exclusiveplug.dtos.InteractBigData;
+import com.qg.exclusiveplug.dtos.RequestData;
+import com.qg.exclusiveplug.dtos.ResponseData;
+import com.qg.exclusiveplug.enums.DMUrl;
+import com.qg.exclusiveplug.enums.Status;
+import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
+import com.qg.exclusiveplug.util.HttpClientUtil;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -29,6 +34,7 @@ public class TcpServiceImpl implements TcpService {
 
     @Override
     public int messageHandler(String message) {
+        assert message != null;
         List<Device> devices = analysisMessage(message);
         //将数据存放到Redis中进行缓存
         // TODO: 2018/9/26 0026  现在Redis不稳定，先换Map做缓存
@@ -48,7 +54,6 @@ public class TcpServiceImpl implements TcpService {
             CacheMap.get(CACHE_KEY).addAll(devices);
         }
         return StateEnum.OK.getState();
-
     }
 
     /**
@@ -78,10 +83,54 @@ public class TcpServiceImpl implements TcpService {
             String currentTime = DateUtil.currentTime();
 
             Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
+
+            // 向数据挖掘端发送设备信息
+            ResponseData responseData = sendDeviceToDM(device);
+            // 将数据传回给前端
+            new MyWebSocketHandler().send(responseData);
+
             System.out.println(device.toString());
             devices.add(device);
         }
 
         return devices;
+    }
+
+    /**
+     * 向数据挖掘端发送设备信息
+     * @param device 设备信息
+     */
+    private ResponseData sendDeviceToDM(Device device){
+        ResponseData responseData = new ResponseData();
+
+        // 将设备信息放入交互类
+        RequestData<Device> requestData = new RequestData<>();
+        requestData.setData(device);
+        InteractBigData interactBigData = null;
+
+        // 与数据挖掘端交互
+        try {
+            interactBigData = HttpClientUtil.demandedCount(DMUrl.JUDGE_STATUS.getDMUrl(), requestData);
+        } catch (IOException e) {
+            log.debug("数据挖掘端连接失败");
+            responseData.setStatus(Status.PREDICTED_FAILED.getStatus());
+            e.printStackTrace();
+            return responseData;
+        }
+
+        Data data;
+        if(null != interactBigData) {
+            data = new Data();
+            // 设置设备状态与信息
+            data.setStatus(interactBigData.getStatus());
+            data.setDevice(device);
+            responseData.setData(data);
+            log.info(data.toString());
+        } else {
+            responseData.setStatus(Status.PREDICTED_FAILED.getStatus());
+        }
+
+        // 返回信息
+        return responseData;
     }
 }
