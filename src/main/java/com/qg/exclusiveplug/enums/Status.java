@@ -15,9 +15,9 @@ public enum Status {
     PREDICTED_FAILED("5001"),
 
     /**
-     * 前端数据错误
+     * 参数解析错误
      */
-    DATA_FAILED("5002")
+    PARAMETER_ERROR("4003"),
     ;
 
     private String status;

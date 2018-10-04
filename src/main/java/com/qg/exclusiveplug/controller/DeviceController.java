@@ -11,6 +11,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 
+
+/**
+ * @author Wilder
+ */
 @RestController
 @Slf4j
 @CrossOrigin
@@ -25,7 +29,7 @@ public class DeviceController {
     }
 
     @RequestMapping("/controller")
-    public ResponseData controller(@RequestBody InteractionData interactionData){
+    public ResponseData controller(@RequestBody InteractionData interactionData) {
         return deviceService.controller(interactionData);
     }
 }

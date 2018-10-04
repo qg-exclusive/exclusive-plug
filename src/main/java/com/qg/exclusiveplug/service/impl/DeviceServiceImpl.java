@@ -6,7 +6,6 @@ import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.Status;
 import com.qg.exclusiveplug.handlers.TcpHandler;
-import com.qg.exclusiveplug.model.Device;
 import com.qg.exclusiveplug.service.DeviceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,10 +13,8 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -47,7 +44,7 @@ public class DeviceServiceImpl implements DeviceService {
             // 按月查询
             doubles = listPowerSumByMonth(interactionData.getIndex(), interactionData.getTime());
         } else {
-            responseData.setStatus(Status.DATA_FAILED.getStatus());
+            responseData.setStatus(Status.PARAMETER_ERROR.getStatus());
             return  responseData;
         }
 

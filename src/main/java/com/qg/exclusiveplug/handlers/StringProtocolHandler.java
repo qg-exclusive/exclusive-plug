@@ -3,14 +3,13 @@ package com.qg.exclusiveplug.handlers;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
+import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 /**
  * @author WilderGao
@@ -35,5 +34,6 @@ public class StringProtocolHandler extends ChannelInitializer<SocketChannel> {
         pipeline.addLast(stringDecoder);
         pipeline.addLast(stringEncoder);
         pipeline.addLast(tcpHandler);
+        pipeline.addLast(new LineBasedFrameDecoder(1024));
     }
 }

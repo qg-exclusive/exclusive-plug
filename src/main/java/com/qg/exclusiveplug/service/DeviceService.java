@@ -3,6 +3,9 @@ package com.qg.exclusiveplug.service;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 
+/**
+ * @author Wilder
+ */
 public interface DeviceService {
 
     /**

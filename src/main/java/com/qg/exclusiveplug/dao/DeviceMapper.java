@@ -1,7 +1,6 @@
 package com.qg.exclusiveplug.dao;
 
 import com.qg.exclusiveplug.model.Device;
-import com.qg.exclusiveplug.model.PredicatedData;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.stereotype.Repository;

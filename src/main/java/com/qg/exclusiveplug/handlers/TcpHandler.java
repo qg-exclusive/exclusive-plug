@@ -3,18 +3,13 @@ package com.qg.exclusiveplug.handlers;
 import com.qg.exclusiveplug.enums.StateEnum;
 import com.qg.exclusiveplug.exception.ExclusivePlugException;
 import com.qg.exclusiveplug.service.TcpService;
-import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.annotation.AccessType;
 import org.springframework.stereotype.Component;
-
-import java.nio.channels.SocketChannel;
-import java.util.Base64;
 
 /**
  * @author WilderGao
@@ -65,8 +60,8 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
         this.ctx = ctx;
         log.info("已经连接上了 : "+ctx.channel().remoteAddress());
         ctx.fireChannelActive();
-        if (log.isDebugEnabled()){
-            log.debug(ctx.channel().remoteAddress()+" ");
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.channel().remoteAddress() + " ");
         }
     }
 

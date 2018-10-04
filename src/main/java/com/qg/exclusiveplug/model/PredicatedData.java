@@ -1,6 +1,5 @@
 package com.qg.exclusiveplug.model;
 
-import lombok.Builder;
 import lombok.Data;
 
 

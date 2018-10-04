@@ -1,21 +1,20 @@
 package com.qg.exclusiveplug.service.impl;
 
 import com.qg.exclusiveplug.cache.CacheMap;
+import com.qg.exclusiveplug.enums.StateEnum;
+import com.qg.exclusiveplug.model.Device;
+import com.qg.exclusiveplug.service.TcpService;
+import com.qg.exclusiveplug.util.DateUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractBigData;
 import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.DMUrl;
-import com.qg.exclusiveplug.enums.StateEnum;
 import com.qg.exclusiveplug.enums.Status;
 import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
-import com.qg.exclusiveplug.model.Device;
-import com.qg.exclusiveplug.service.TcpService;
-import com.qg.exclusiveplug.util.DateUtil;
 import com.qg.exclusiveplug.util.HttpClientUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.web.socket.WebSocketHandler;
 
 import java.io.IOException;
 import java.util.Arrays;
@@ -134,7 +133,4 @@ public class TcpServiceImpl implements TcpService {
         // 返回信息
         return responseData;
     }
-
-
-
 }

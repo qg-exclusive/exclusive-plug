@@ -41,6 +41,8 @@ netty:
   keep-alive: true
   backlog: 100
 
+logging:
+  file: /root/exclusive_plug/mylog.log
 #阿里云短信配置
 aliyun:
   sms:
