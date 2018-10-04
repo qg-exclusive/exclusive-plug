@@ -1,5 +1,6 @@
 package com.qg.exclusiveplug.dtos;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Data;
  * description 接收前端发来的数据
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InteractionData {
 
     /**

@@ -7,6 +7,7 @@ import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.Status;
 import com.qg.exclusiveplug.handlers.TcpHandler;
 import com.qg.exclusiveplug.service.DeviceService;
+import com.qg.exclusiveplug.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,11 @@ public class DeviceServiceImpl implements DeviceService {
      */
     @Override
     public ResponseData listPowerSum(InteractionData interactionData) {
+        if(interactionData.getKey() > 6 || interactionData.getKey() < 3 || !DateUtil.isTimeLegal(interactionData.getTime())){
+            //参数有误
+            log.error("前端传入参数有误");
+            return new ResponseData(Status.PARAMETER_ERROR.getStatus(), null);
+        }
         ResponseData responseData = new ResponseData();
         log.info(String.valueOf(interactionData.getKey()));
         Double[] doubles;
@@ -40,12 +46,9 @@ public class DeviceServiceImpl implements DeviceService {
         } else if (interactionData.getKey() == 4) {
             // 按周查询
             doubles = listPowerSumByWeek(interactionData.getIndex(), interactionData.getTime());
-        } else if (interactionData.getKey() == 5){
+        } else {
             // 按月查询
             doubles = listPowerSumByMonth(interactionData.getIndex(), interactionData.getTime());
-        } else {
-            responseData.setStatus(Status.PARAMETER_ERROR.getStatus());
-            return  responseData;
         }
 
         // 返回数据
@@ -53,7 +56,7 @@ public class DeviceServiceImpl implements DeviceService {
         Data data = new Data();
         data.setPowerSums(doubles);
         responseData.setData(data);
-        return new ResponseData();
+        return responseData;
     }
 
     /**
@@ -63,7 +66,7 @@ public class DeviceServiceImpl implements DeviceService {
      * @return 该天24小时各自的用电量
      */
     private Double[] listPowerSumByDay(int index, String time) {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:dd:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Double[] doubles = new Double[24];
         try {
             Date date = sdf.parse(time);
@@ -92,7 +95,7 @@ public class DeviceServiceImpl implements DeviceService {
      * @return 该周7天各自的用电量
      */
     private Double[] listPowerSumByWeek(int index, String time){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:dd:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Double[] doubles = new Double[7];
         try {
             Date date = sdf.parse(time);
@@ -121,7 +124,7 @@ public class DeviceServiceImpl implements DeviceService {
      * @return 该月30天各自的用电量
      */
     private Double[] listPowerSumByMonth(int index, String time){
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:dd:ss");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Double[] doubles = new Double[30];
         try {
             Date date = sdf.parse(time);
@@ -143,6 +146,7 @@ public class DeviceServiceImpl implements DeviceService {
         return doubles;
     }
 
+
     /**
      * 控制用电器的开关
      *
@@ -153,6 +157,7 @@ public class DeviceServiceImpl implements DeviceService {
     public ResponseData controller(InteractionData interactionData) {
         // 发送串口和控制开关信息
         String message = interactionData.getIndex() + "-" + interactionData.getKey();
+        log.info("控制开关" + message);
         new TcpHandler().send(message);
 
         // 返回结果

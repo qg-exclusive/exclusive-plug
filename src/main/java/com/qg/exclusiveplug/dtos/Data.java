@@ -1,5 +1,6 @@
 package com.qg.exclusiveplug.dtos;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.qg.exclusiveplug.model.Device;
 
 /**
@@ -8,6 +9,7 @@ import com.qg.exclusiveplug.model.Device;
  * description 用来承载所需响应给前端的数据
  */
 @lombok.Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Data {
 
     /**
@@ -24,4 +26,9 @@ public class Data {
      * 用电量
      */
     Double[] powerSums;
+
+    /**
+     * 用电量
+     */
+    Double powerSum;
 }

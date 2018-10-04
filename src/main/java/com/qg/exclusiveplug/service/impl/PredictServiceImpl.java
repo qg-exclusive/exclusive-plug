@@ -1,17 +1,27 @@
 package com.qg.exclusiveplug.service.impl;
 
 import com.qg.exclusiveplug.dao.DataMapper;
+import com.qg.exclusiveplug.dao.DeviceMapper;
+import com.qg.exclusiveplug.dtos.Data;
+import com.qg.exclusiveplug.dtos.InteractBigData;
+import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
+import com.qg.exclusiveplug.enums.DMUrl;
 import com.qg.exclusiveplug.enums.SerialPort;
 import com.qg.exclusiveplug.enums.Status;
 import com.qg.exclusiveplug.service.PredictService;
 import com.qg.exclusiveplug.util.DateUtil;
+import com.qg.exclusiveplug.util.HttpClientUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ListOperations;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -27,22 +37,61 @@ public class PredictServiceImpl implements PredictService {
     private static int ONE = 1;
     private static String PATTERN = "yyyy-MM-dd";
     @Autowired
-    private DataMapper dataMapper;
+    private DeviceMapper deviceMapper;
+
     @Override
     public ResponseData predictNowPowerSumService(String time, int index) {
-        if (index > THREE || index < ONE || !DateUtil.isDate(time)){
+        if (index > THREE || index < ONE || !DateUtil.isDate(time)) {
             //参数有误
             log.error("前端传入参数有误");
             return new ResponseData(Status.PARAMETER_ERROR.getStatus(), null);
         }
 
-        Date date = DateUtil.stringToDate(time, PATTERN);
-        String[] beforeDates = DateUtil.getDayBefore(date, 7);
+        ResponseData responseData = new ResponseData();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Double[] doubles = new Double[7];
 
-        //开始收集七天的数据
-        //todo 这里后期要改为批量模糊查询，暂时先用循环查询
-        for (String d : beforeDates) {
+        try {
+            Date date = sdf.parse(time);
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            for (int i = 0; i < 7; i++) {
+                // 查询每个时间段的用电量
+                String endTime = sdf.format(calendar.getTime());
+                calendar.add(Calendar.DAY_OF_MONTH, -1);
+                String startTime = sdf.format(calendar.getTime().getTime());
+                doubles[6 - i] = deviceMapper.listPowerSum(index, startTime, endTime);
+                log.info("开始时间：" + startTime + "结束时间：" + endTime + "结果：" + doubles[6 - i]);
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
-        return null;
+
+        // 准备预测数据
+        RequestData requestData = new RequestData<>();
+        requestData.setPowerSums(doubles);
+
+        InteractBigData interactBigData;
+        try {
+            interactBigData = HttpClientUtil.demandedCount(DMUrl.PREDICTED_POWERSUM.getDMUrl(), requestData);
+        } catch (IOException e) {
+            log.info("连接DM失败");
+            responseData.setStatus(Status.PREDICTED_FAILED.getStatus());
+            return responseData;
+        }
+
+        // 预测成功
+        if(null != interactBigData){
+            responseData.setStatus(Status.NORMAL.getStatus());
+            Data data = new Data();
+            data.setPowerSum(interactBigData.getPowerSum());
+            responseData.setData(data);
+            return responseData;
+        }
+
+        // 预测失败
+        log.info("DM返回数据为空");
+        responseData.setStatus(Status.PREDICTED_FAILED.getStatus());
+        return responseData;
     }
 }

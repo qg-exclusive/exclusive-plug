@@ -2,9 +2,12 @@ package com.qg.exclusiveplug.controller;
 
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import com.qg.exclusiveplug.service.PredictService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 /**
  * @author WilderGao
@@ -12,17 +15,20 @@ import org.springframework.web.bind.annotation.RestController;
  * motto : everything is no in vain
  * description 预测接口
  */
-@RestController(value = "/predicted")
+@RestController()
+@RequestMapping("/predicted")
+@CrossOrigin
 public class PredictController {
+    @Resource
+    private PredictService predictService;
 
     /**
      * 预测今天的用电量
-     * @param request   前端请求参数，包括串口号index 和时间time
+     * @param interactionData   前端请求参数，包括串口号index 和时间time
      * @return  预测之后的结果
      */
-    @PutMapping(value = "/nowtpowersum")
-    public ResponseData predictTodayPowerSum(@RequestBody InteractionData request){
-        //todo 还没写完
-        return null;
+    @PostMapping(value = "/nowpowersum")
+    public ResponseData predictTodayPowerSum(@RequestBody InteractionData interactionData){
+        return predictService.predictNowPowerSumService(interactionData.getTime(), interactionData.getIndex());
     }
 }

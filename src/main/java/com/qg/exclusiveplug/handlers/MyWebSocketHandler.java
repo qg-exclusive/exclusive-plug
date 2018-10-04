@@ -21,7 +21,7 @@ import org.springframework.web.socket.WebSocketSession;
 @Slf4j
 public class MyWebSocketHandler implements WebSocketHandler {
 
-    public static WebSocketSession session;
+    public static WebSocketSession session = null;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
@@ -54,7 +54,9 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
     public void send(ResponseData responseData) {
         try {
-            session.sendMessage(new TextMessage(new Gson().toJson(responseData)));
+            if(null != session){
+                session.sendMessage(new TextMessage(new Gson().toJson(responseData)));
+            }
         } catch (IOException e) {
             log.error("发送失败");
             e.printStackTrace();
