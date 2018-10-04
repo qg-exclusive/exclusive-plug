@@ -1,16 +1,15 @@
 package com.qg.exclusiveplug.handlers;
 
 import com.google.gson.Gson;
+import com.qg.exclusiveplug.dtos.ResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.*;
+import java.io.IOException;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
-import com.qg.exclusiveplug.dtos.ResponseData;
-import org.springframework.web.socket.*;
-
-import java.io.IOException;
 
 /**
  * @author WilderGao
@@ -22,7 +21,7 @@ import java.io.IOException;
 @Slf4j
 public class MyWebSocketHandler implements WebSocketHandler {
 
-    public static WebSocketSession session;
+    public static WebSocketSession session = null;
 
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
@@ -55,7 +54,9 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
     public void send(ResponseData responseData) {
         try {
-            session.sendMessage(new TextMessage(new Gson().toJson(responseData)));
+            if(null != session){
+                session.sendMessage(new TextMessage(new Gson().toJson(responseData)));
+            }
         } catch (IOException e) {
             log.error("发送失败");
             e.printStackTrace();

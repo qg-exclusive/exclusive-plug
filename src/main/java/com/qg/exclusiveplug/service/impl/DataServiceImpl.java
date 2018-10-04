@@ -20,7 +20,9 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
-
+/**
+ * @author Wilder
+ */
 @Service
 @Slf4j
 public class DataServiceImpl implements DataService {
@@ -38,7 +40,6 @@ public class DataServiceImpl implements DataService {
      */
     @Override
     public void listDevicesCPByDate(String machineName, String date) {
-        final long timeInteval = 24 * 60 * 60;
 
         log.info(machineName + ":" + date);
         List<Device> deviceList = dataMapper.listDevicesCPByDate(machineName, date);

@@ -9,7 +9,6 @@ import io.netty.channel.SimpleChannelInboundHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.data.annotation.AccessType;
 import org.springframework.stereotype.Component;
 
 /**
@@ -25,6 +24,8 @@ import org.springframework.stereotype.Component;
 public class TcpHandler extends SimpleChannelInboundHandler<String> {
     @Autowired
     private TcpService tcpService;
+
+    ChannelHandlerContext ctx = null;
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, String s)
@@ -50,17 +51,22 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        ctx.channel().writeAndFlush("CLOSED");
         log.info("断开连接 ... ");
         super.channelInactive(ctx);
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx){
+        this.ctx = ctx;
         log.info("已经连接上了 : "+ctx.channel().remoteAddress());
         ctx.fireChannelActive();
-        if (log.isDebugEnabled()){
-            log.debug(ctx.channel().remoteAddress()+" ");
+        if (log.isDebugEnabled()) {
+            log.debug(ctx.channel().remoteAddress() + " ");
         }
+    }
 
+    public void send(String message){
+        ctx.channel().writeAndFlush(message);
     }
 }

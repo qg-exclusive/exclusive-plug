@@ -3,18 +3,6 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.qg.exclusiveplug.dao.DeviceMapper">
-    <resultMap id="DeviceMap" type="com.qg.exclusiveplug.model.Device">
-        <id column="id" jdbcType="INT" property="id" />
-        <result column="name" jdbcType="VARCHAR" property="name"/>
-        <result column="current" jdbcType="DOUBLE" property="current"/>
-        <result column="voltage" jdbcType="DOUBLE" property="voltage"/>
-        <result column="power" jdbcType="DOUBLE" property="power"/>
-        <result column="date" jdbcType="VARCHAR" property="date"/>
-        <result column="index_num" jdbcType="INT" property="index"/>
-        <result column="power_factor" jdbcType="DOUBLE" property="powerFactor"/>
-        <result column="frequency" jdbcType="DOUBLE" property="frequency"/>
-        <result column="cumulative_power" jdbcType="DOUBLE" property="cumulativePower"/>
-    </resultMap>
     <insert id="saveDevices" parameterType="com.qg.exclusiveplug.model.Device">
         INSERT INTO device
         (name, current, voltage, power, date, power_factor,
@@ -34,26 +22,21 @@
             )
         </foreach>
     </insert>
-    <select id="listPowerSum" resultType="DeviceMap">
+    <select id="listPowerSum" resultType="Double">
+      SELECT SUM(sum) AS power FROM
+      (
         (
-        SELECT id, index_num, date, cumulative_power
-        FROM device
-        <foreach collection="date" index="index" item="item" separator=",">
-            WHERE index_num = ${index} AND date LIKE
-            concat('%','${item.date}','%')
-            ORDER BY date ASC
-            LIMIT 1
-        </foreach>
+          SELECT MAX(cumulative_power) AS sum
+          FROM device
+          WHERE index_num = ${index}
+          AND date BETWEEN #{startTime} AND #{endTime}
         )
+        UNION ALL
         (
-        SELECT id, index_num, date, cumulative_power
-        FROM device
-        <foreach collection="date" index="index" item="item" separator=",">
-            WHERE index_num = ${index} AND date LIKE
-            concat('%','${item.date}','%')
-            ORDER BY date DESC
-            LIMIT 1
-        </foreach>
+          SELECT -MIN(cumulative_power) AS sum
+          FROM device WHERE index_num = ${index}
+          AND date BETWEEN #{startTime} AND #{endTime}
         )
+      )AS total;
     </select>
 </mapper>

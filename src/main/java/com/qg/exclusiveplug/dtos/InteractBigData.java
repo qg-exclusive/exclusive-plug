@@ -1,5 +1,6 @@
 package com.qg.exclusiveplug.dtos;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
 
 /**
@@ -8,6 +9,7 @@ import lombok.Data;
  * description 接收数据挖掘回应的类
  */
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class InteractBigData {
     /**
      * 用电器的状态
@@ -15,5 +17,13 @@ public class InteractBigData {
      */
     int status;
 
-    double[] powerSum;
+    /**
+     * 用电量
+     */
+    Double[] powerSums;
+
+    /**
+     * 用电量
+     */
+    Double powerSum;
 }

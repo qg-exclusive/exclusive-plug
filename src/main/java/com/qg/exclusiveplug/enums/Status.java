@@ -9,7 +9,15 @@ public enum Status {
      */
     NORMAL("2000"),
 
-    PREDICTED_FAILED("5001")
+    /**
+     * 预测失败
+     */
+    PREDICTED_FAILED("5001"),
+
+    /**
+     * 参数解析错误
+     */
+    PARAMETER_ERROR("4003"),
     ;
 
     private String status;
