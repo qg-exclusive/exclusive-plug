@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.core.annotation.Order;
 
 import java.text.ParseException;
@@ -22,6 +23,7 @@ import java.util.List;
  */
 @Configuration
 @Order(1)
+@Profile(value = "dev")
 public class BeforeStartup implements ApplicationRunner {
 
     @Autowired

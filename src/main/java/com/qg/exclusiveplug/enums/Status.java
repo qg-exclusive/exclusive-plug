@@ -17,7 +17,7 @@ public enum Status {
     /**
      * 参数解析错误
      */
-    PARAMETER_ERROR("4003"),
+    PARAMETER_ERROR("4001"),
     ;
 
     private String status;

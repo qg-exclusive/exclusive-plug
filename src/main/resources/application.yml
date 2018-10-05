@@ -1,7 +1,7 @@
 # Druid 配置
 spring:
   profiles:
-    active: test
+    active: dev
   # Redis 配置
   redis:
     database: 0
