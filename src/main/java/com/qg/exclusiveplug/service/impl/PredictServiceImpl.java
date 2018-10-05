@@ -9,6 +9,7 @@ import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.DMUrl;
 import com.qg.exclusiveplug.enums.SerialPort;
 import com.qg.exclusiveplug.enums.Status;
+import com.qg.exclusiveplug.model.PowerSum;
 import com.qg.exclusiveplug.service.PredictService;
 import com.qg.exclusiveplug.util.DateUtil;
 import com.qg.exclusiveplug.util.HttpClientUtil;
@@ -35,7 +36,6 @@ import java.util.Date;
 public class PredictServiceImpl implements PredictService {
     private static int THREE = 3;
     private static int ONE = 1;
-    private static String PATTERN = "yyyy-MM-dd";
     @Autowired
     private DeviceMapper deviceMapper;
 
@@ -84,7 +84,8 @@ public class PredictServiceImpl implements PredictService {
         if(null != interactBigData){
             responseData.setStatus(Status.NORMAL.getStatus());
             Data data = new Data();
-            data.setPowerSum(interactBigData.getPowerSum());
+            PowerSum powerSum = new PowerSum(time, interactBigData.getPowerSum());
+            data.setPowerSum(powerSum);
             responseData.setData(data);
             return responseData;
         }

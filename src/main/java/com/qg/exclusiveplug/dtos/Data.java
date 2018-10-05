@@ -2,6 +2,9 @@ package com.qg.exclusiveplug.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.qg.exclusiveplug.model.Device;
+import com.qg.exclusiveplug.model.PowerSum;
+
+import java.util.List;
 
 /**
  * @author Chen
@@ -30,5 +33,15 @@ public class Data {
     /**
      * 用电量
      */
-    Double powerSum;
+    List<PowerSum> powerSumList;
+
+    /**
+     * 用电量
+     */
+    PowerSum powerSum;
+
+    /**
+     * 长时间待机队列
+     */
+    List<Integer> longAwaitList;
 }

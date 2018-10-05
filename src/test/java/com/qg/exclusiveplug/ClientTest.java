@@ -10,8 +10,6 @@ import java.io.*;
 import java.net.Socket;
 
 @Slf4j
-@RunWith(SpringRunner.class)
-@SpringBootTest
 public class ClientTest {
 
     @Test
@@ -33,10 +31,12 @@ public class ClientTest {
         while(null != (line = bufferedReader.readLine())){
             log.info(line);
             // 3、使用输出流将指定的数据写出去
-            bufferedWriter.write(line);
+            while (true){
+                bufferedWriter.write(line);
+            }
         }
 
         // 4、关闭 Socket 服务
-        socket.close();
+//        socket.close();
     }
 }

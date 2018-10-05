@@ -1,7 +1,9 @@
 package com.qg.exclusiveplug.service.impl;
 
 import com.qg.exclusiveplug.cache.CacheMap;
+import com.qg.exclusiveplug.enums.DeviceStatus;
 import com.qg.exclusiveplug.enums.StateEnum;
+import com.qg.exclusiveplug.handlers.TcpHandler;
 import com.qg.exclusiveplug.model.Device;
 import com.qg.exclusiveplug.service.TcpService;
 import com.qg.exclusiveplug.util.DateUtil;
@@ -15,11 +17,13 @@ import com.qg.exclusiveplug.enums.DMUrl;
 import com.qg.exclusiveplug.enums.Status;
 import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
 import com.qg.exclusiveplug.util.HttpClientUtil;
+import org.springframework.web.socket.WebSocketHandler;
 
+import java.awt.image.DataBufferUShort;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.util.*;
 
 /**
  * @author WilderGao
@@ -31,6 +35,15 @@ import java.util.List;
 @Slf4j
 public class TcpServiceImpl implements TcpService {
     private static final String CACHE_KEY = "devices";
+
+    /**
+     * 记录某串口最后待机的时间
+     */
+    private static Map<Integer, Date> timeMap = new HashMap<>();
+    /**
+     * 记录长时间待机队列
+     */
+    private static List<Integer> longAwaitList = new ArrayList<>();
 
     @Override
     public int messageHandler(String message) {
@@ -48,9 +61,9 @@ public class TcpServiceImpl implements TcpService {
 //        }
 //        return StateEnum.OK.getState();
 
-        if (!CacheMap.containKey(CACHE_KEY)){
+        if (!CacheMap.containKey(CACHE_KEY)) {
             CacheMap.put(CACHE_KEY, devices);
-        }else {
+        } else {
             CacheMap.get(CACHE_KEY).addAll(devices);
         }
         return StateEnum.OK.getState();
@@ -58,18 +71,19 @@ public class TcpServiceImpl implements TcpService {
 
     /**
      * 将tcp收到的消息解析成设备对象
-     * @param message   消息
-     * @return  设备对象
+     *
+     * @param message 消息
+     * @return 设备对象
      */
-    private List<Device> analysisMessage(String message){
+    private List<Device> analysisMessage(String message) {
         //解析参数
         String[] parameters = message.split("end");
         List<String> list = Arrays.asList(parameters);
         List<Device> devices = new LinkedList<>();
-        for(String s : list){
+        for (String s : list) {
             //查看是哪个串口
-            int index = (int)s.charAt(s.length()-1) - 48;
-            s = s.substring(0, s.length()-1);
+            int index = (int) s.charAt(s.length() - 1) - 48;
+            s = s.substring(0, s.length() - 1);
             log.info(s);
             //得到单个插口所有参数信息
             String[] plugs = s.split(",");
@@ -85,11 +99,10 @@ public class TcpServiceImpl implements TcpService {
             Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
 
             // 向数据挖掘端发送设备信息
-            ResponseData responseData = sendDeviceToDM(device);
+            int status = sendDeviceToDM(device);
             // 将数据传回给前端
-            new MyWebSocketHandler().send(responseData);
+            send(device, status);
 
-            System.out.println(device.toString());
             devices.add(device);
         }
 
@@ -97,10 +110,11 @@ public class TcpServiceImpl implements TcpService {
     }
 
     /**
-     * 向数据挖掘端发送设备信息
+     * 向数据挖掘端发送设备信息并得到设备状态
+     *
      * @param device 设备信息
      */
-    private ResponseData sendDeviceToDM(Device device){
+    private int sendDeviceToDM(Device device) {
         ResponseData responseData = new ResponseData();
 
         // 将设备信息放入交互类
@@ -115,22 +129,57 @@ public class TcpServiceImpl implements TcpService {
             log.debug("数据挖掘端连接失败");
             responseData.setStatus(Status.PREDICTED_FAILED.getStatus());
             e.printStackTrace();
-            return responseData;
         }
 
-        Data data;
-        if(null != interactBigData) {
-            data = new Data();
-            // 设置设备状态与信息
-            data.setStatus(interactBigData.getStatus());
-            data.setDevice(device);
-            responseData.setData(data);
-            log.info(data.toString());
-        } else {
-            responseData.setStatus(Status.PREDICTED_FAILED.getStatus());
+        if (null != interactBigData) {
+            return interactBigData.getStatus();
         }
 
         // 返回信息
-        return responseData;
+        return 0;
+    }
+
+    public void send(Device device, int status) {
+        log.info("状态" + status);
+        Data data = new Data();
+        int index = device.getIndex();
+        // 判断长时间待机状态
+        if (status == DeviceStatus.STANDBY.getIndex()) {
+            // 更新timeMap时间
+            if (!timeMap.containsKey(index)) {
+                timeMap.put(index, DateUtil.getCurrentDate());
+            } else {
+                Date currentTime = DateUtil.getCurrentDate();
+                int diffHour = DateUtil.diffHours(timeMap.get(index), currentTime);
+                // 判断待机持续时间
+                if (diffHour > 5) {
+                    // 加入长时间待机警示队列
+                    if (!longAwaitList.contains(index)) {
+                        longAwaitList.add(index);
+                    }
+                } else {
+                    // 移出长时间待机警示队列
+                    if(longAwaitList.contains(index)){
+                        longAwaitList.remove(index);
+                    }
+                }
+            }
+        }else {
+            // 更新最近检测时间和待机队列
+            timeMap.replace(index, DateUtil.getCurrentDate());
+            longAwaitList.remove(Integer.valueOf(index));
+        }
+
+        // 发送特定串口数据
+        if (device.getIndex() == MyWebSocketHandler.getIndex()) {
+            // 设置交互数据
+            data.setDevice(device);
+            data.setStatus(status);
+            data.setLongAwaitList(longAwaitList);
+            ResponseData responseData = new ResponseData();
+            responseData.setStatus(Status.NORMAL.getStatus());
+            responseData.setData(data);
+            MyWebSocketHandler.send(responseData);
+        }
     }
 }

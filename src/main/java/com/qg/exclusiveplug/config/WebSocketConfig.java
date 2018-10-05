@@ -22,7 +22,7 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(handler, "/ws").addInterceptors(new WebSocketInterceptor()).setAllowedOrigins("*");
+        registry.addHandler(handler, "/message").addInterceptors(new WebSocketInterceptor()).setAllowedOrigins("*");
         registry.addHandler(handler, "/sockjs/message").addInterceptors(new WebSocketInterceptor()).setAllowedOrigins("*").withSockJS();
     }
 }

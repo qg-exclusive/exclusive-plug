@@ -9,7 +9,10 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -42,8 +45,16 @@ public class BeforeStartup implements ApplicationRunner {
         new Thread(()->{
             while(true){
                 String date = DateUtil.currentTime().split(" ")[0];
+                // 提前一天
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+                Calendar calendar = Calendar.getInstance();
+                try {
+                    calendar.setTime(sdf.parse(date));
+                } catch (ParseException e) {
+                    e.printStackTrace();
+                }
                 for(String machineName : machineNameList){
-                    dataService.listDevicesCPByDate(machineName, date);
+                    dataService.listDevicesCPByDate(machineName, sdf.format(calendar.getTime()));
                 }
                 try {
                     Thread.sleep(timeInterval);

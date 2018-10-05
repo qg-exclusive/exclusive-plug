@@ -9,7 +9,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -27,6 +27,39 @@ public class DateUtil {
     public static String currentTime() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(PATTERN);
         return formatter.format(LocalDateTime.now());
+    }
+
+    public static Date getCurrentDate(){
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(PATTERN);
+        try {
+            return simpleDateFormat.parse(currentTime());
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Map<Integer,String> map = new HashMap<>();
+        map.put(1,"1");
+        map.replace(1,"2");
+        System.out.println(map.get(1));
+    }
+
+    /**
+     * 得到两个时间相差的小时数
+     * @param startTime 开始时间
+     * @param endTime 结束时间
+     * @return 相差的小时数
+     */
+    public static int diffHours(Date startTime, Date endTime){
+        Calendar startTimeCal = Calendar.getInstance();
+        startTimeCal.setTime(startTime);
+
+        Calendar endTimeCal = Calendar.getInstance();
+        endTimeCal.setTime(endTime);
+
+        return endTimeCal.get(Calendar.HOUR) - startTimeCal.get(Calendar.HOUR);
     }
 
     /**

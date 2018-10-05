@@ -21,7 +21,12 @@ import org.springframework.web.socket.WebSocketSession;
 @Slf4j
 public class MyWebSocketHandler implements WebSocketHandler {
 
-    public static WebSocketSession session = null;
+    private static WebSocketSession session = null;
+    private static int index = 0;
+
+    public static int getIndex(){
+        return index;
+    }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
@@ -33,6 +38,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
     public void handleMessage(WebSocketSession webSocketSession,
                               WebSocketMessage<?> webSocketMessage) throws Exception {
         log.info("接收信息 >> {}",webSocketMessage.getPayload());
+        index = Integer.valueOf(String.valueOf(webSocketMessage.getPayload()).split(":")[1]);
+        log.info("切换串口：" + index);
     }
 
     @Override
@@ -44,6 +51,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession,
                                       CloseStatus closeStatus) throws Exception {
+        index = 0;
+        session = null;
         log.info("Socket会话结束，即将移除socket");
     }
 
@@ -52,7 +61,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
         return false;
     }
 
-    public void send(ResponseData responseData) {
+    public static void send(ResponseData responseData) {
         try {
             if(null != session){
                 session.sendMessage(new TextMessage(new Gson().toJson(responseData)));

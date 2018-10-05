@@ -25,7 +25,7 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
     @Autowired
     private TcpService tcpService;
 
-    ChannelHandlerContext ctx = null;
+    private static ChannelHandlerContext ctx = null;
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, String s)
