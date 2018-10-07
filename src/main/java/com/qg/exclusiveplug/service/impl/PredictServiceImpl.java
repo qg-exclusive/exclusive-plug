@@ -1,22 +1,18 @@
 package com.qg.exclusiveplug.service.impl;
 
-import com.qg.exclusiveplug.dao.DataMapper;
 import com.qg.exclusiveplug.dao.DeviceMapper;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractBigData;
 import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.DMUrl;
-import com.qg.exclusiveplug.enums.SerialPort;
 import com.qg.exclusiveplug.enums.Status;
 import com.qg.exclusiveplug.model.PowerSum;
 import com.qg.exclusiveplug.service.PredictService;
 import com.qg.exclusiveplug.util.DateUtil;
 import com.qg.exclusiveplug.util.HttpClientUtil;
-import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.ListOperations;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -61,6 +57,10 @@ public class PredictServiceImpl implements PredictService {
                 calendar.add(Calendar.DAY_OF_MONTH, -1);
                 String startTime = sdf.format(calendar.getTime().getTime());
                 doubles[6 - i] = deviceMapper.listPowerSum(index, startTime, endTime);
+                // 判空，防止无数据的情况发生
+                if(null == doubles[6 - i]){
+                    doubles[6 - i] = 0.0;
+                }
                 log.info("开始时间：" + startTime + "结束时间：" + endTime + "结果：" + doubles[6 - i]);
             }
         } catch (ParseException e) {

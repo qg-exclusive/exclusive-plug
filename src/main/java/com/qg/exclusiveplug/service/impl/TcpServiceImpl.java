@@ -1,28 +1,23 @@
 package com.qg.exclusiveplug.service.impl;
 
 import com.qg.exclusiveplug.cache.CacheMap;
-import com.qg.exclusiveplug.enums.DeviceStatus;
-import com.qg.exclusiveplug.enums.StateEnum;
-import com.qg.exclusiveplug.handlers.TcpHandler;
-import com.qg.exclusiveplug.model.Device;
-import com.qg.exclusiveplug.service.TcpService;
-import com.qg.exclusiveplug.util.DateUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractBigData;
 import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.DMUrl;
+import com.qg.exclusiveplug.enums.DeviceStatus;
+import com.qg.exclusiveplug.enums.StateEnum;
 import com.qg.exclusiveplug.enums.Status;
 import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
+import com.qg.exclusiveplug.model.Device;
+import com.qg.exclusiveplug.service.TcpService;
+import com.qg.exclusiveplug.util.DateUtil;
 import com.qg.exclusiveplug.util.HttpClientUtil;
-import org.springframework.web.socket.WebSocketHandler;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
-import java.awt.image.DataBufferUShort;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
 import java.util.*;
 
 /**
@@ -98,10 +93,13 @@ public class TcpServiceImpl implements TcpService {
 
             Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
 
-            // 向数据挖掘端发送设备信息
-            int status = sendDeviceToDM(device);
-            // 将数据传回给前端
-            send(device, status);
+            // 如果需要发送数据
+            if(MyWebSocketHandler.getIndex() != 0){
+                // 向数据挖掘端发送设备信息
+                int status = sendDeviceToDM(device);
+                // 将数据传回给前端
+                send(device, status);
+            }
 
             devices.add(device);
         }
@@ -139,7 +137,7 @@ public class TcpServiceImpl implements TcpService {
         return 0;
     }
 
-    public void send(Device device, int status) {
+    private void send(Device device, int status) {
         log.info("状态" + status);
         Data data = new Data();
         int index = device.getIndex();
@@ -160,7 +158,7 @@ public class TcpServiceImpl implements TcpService {
                 } else {
                     // 移出长时间待机警示队列
                     if(longAwaitList.contains(index)){
-                        longAwaitList.remove(index);
+                        longAwaitList.remove(Integer.valueOf(index));
                     }
                 }
             }
