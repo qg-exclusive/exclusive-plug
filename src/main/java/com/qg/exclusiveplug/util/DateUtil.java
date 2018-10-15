@@ -39,28 +39,17 @@ public class DateUtil {
         return null;
     }
 
-    public static void main(String[] args) {
-        Map<Integer,String> map = new HashMap<>();
-        map.put(1,"1");
-        map.replace(1,"2");
-        System.out.println(map.get(1));
-    }
 
     /**
-     * 得到两个时间相差的小时数
+     * 得到两个时间相差的秒数
      * @param startTime 开始时间
      * @param endTime 结束时间
-     * @return 相差的小时数
+     * @return 相差的秒数
      */
-    public static int diffHours(Date startTime, Date endTime){
-        Calendar startTimeCal = Calendar.getInstance();
-        startTimeCal.setTime(startTime);
-
-        Calendar endTimeCal = Calendar.getInstance();
-        endTimeCal.setTime(endTime);
-
-        return endTimeCal.get(Calendar.HOUR) - startTimeCal.get(Calendar.HOUR);
+    public static int diffSecond(Date startTime, Date endTime){
+        return (int) ((endTime.getTime() - startTime.getTime()) / 1000);
     }
+
 
     /**
      * 获得该日期前几天的数据

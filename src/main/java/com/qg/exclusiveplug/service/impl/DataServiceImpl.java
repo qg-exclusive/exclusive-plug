@@ -41,7 +41,7 @@ public class DataServiceImpl implements DataService {
     @Override
     public void listDevicesCPByDate(String machineName, String date) {
 
-        log.info(machineName + ":" + date);
+        log.info("每日用电量收集信息：" + machineName + ":" + date);
         List<Device> deviceList = dataMapper.listDevicesCPByDate(machineName, date);
         log.info("开始收集每日用电总量");
         PredicatedData predicatedData = new PredicatedData();

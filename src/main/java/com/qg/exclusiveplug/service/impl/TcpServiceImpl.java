@@ -13,6 +13,7 @@ import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
 import com.qg.exclusiveplug.model.Device;
 import com.qg.exclusiveplug.service.TcpService;
 import com.qg.exclusiveplug.util.DateUtil;
+import com.qg.exclusiveplug.util.FormatMatchingUtil;
 import com.qg.exclusiveplug.util.HttpClientUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -76,34 +77,36 @@ public class TcpServiceImpl implements TcpService {
         List<String> list = Arrays.asList(parameters);
         List<Device> devices = new LinkedList<>();
         for (String s : list) {
-            //查看是哪个串口
-            int index = (int) s.charAt(s.length() - 1) - 48;
-            s = s.substring(0, s.length() - 1);
-            log.info(s);
-            //得到单个插口所有参数信息
-            String[] plugs = s.split(",");
-            String name = plugs[0].split(":")[0];
-            double voltage = Double.parseDouble(plugs[0].split(":")[2]);
-            double current = Double.parseDouble(plugs[1].split(":")[1]);
-            double power = Double.parseDouble(plugs[2].split(":")[1]);
-            double powerFactor = Double.parseDouble(plugs[3].split(":")[1]);
-            double frequency = Double.parseDouble(plugs[4].split(":")[1]);
-            double cumulativePower = Double.parseDouble(plugs[5].split(":")[1]);
-            String currentTime = DateUtil.currentTime();
+            // 发生信息是否符合格式
+            if(FormatMatchingUtil.isServiceInfo(s)){
+                //查看是哪个串口
+                int index = (int) s.charAt(s.length() - 1) - 48;
+                s = s.substring(0, s.length() - 1);
+                //得到单个插口所有参数信息
+                String[] plugs = s.split(",");
+                String name = plugs[0].split(":")[0];
+                double voltage = Double.parseDouble(plugs[0].split(":")[2]);
+                double current = Double.parseDouble(plugs[1].split(":")[1]);
+                double power = Double.parseDouble(plugs[2].split(":")[1]);
+                double powerFactor = Double.parseDouble(plugs[3].split(":")[1]);
+                double frequency = Double.parseDouble(plugs[4].split(":")[1]);
+                double cumulativePower = Double.parseDouble(plugs[5].split(":")[1]);
+                String currentTime = DateUtil.currentTime();
 
-            Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
+                Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
 
-            // 如果需要发送数据
-            if(MyWebSocketHandler.getIndex() != 0){
-                // 向数据挖掘端发送设备信息
-                int status = sendDeviceToDM(device);
-                // 将数据传回给前端
-                send(device, status);
+                log.info("插入数据：" + device.toString());
+                // 如果需要发送数据
+                if(MyWebSocketHandler.getIndex() != 0){
+                    // 向数据挖掘端发送设备信息
+                    int status = sendDeviceToDM(device);
+                    // 将数据传回给前端
+                    send(device, status);
+                }
+
+                devices.add(device);
             }
-
-            devices.add(device);
         }
-
         return devices;
     }
 
@@ -148,9 +151,10 @@ public class TcpServiceImpl implements TcpService {
                 timeMap.put(index, DateUtil.getCurrentDate());
             } else {
                 Date currentTime = DateUtil.getCurrentDate();
-                int diffHour = DateUtil.diffHours(timeMap.get(index), currentTime);
+                int diffSecond = DateUtil.diffSecond(timeMap.get(index), currentTime);
+                log.info(device.getName() + "已挂机" + diffSecond + "秒");
                 // 判断待机持续时间
-                if (diffHour > 5) {
+                if (diffSecond > 5) {
                     // 加入长时间待机警示队列
                     if (!longAwaitList.contains(index)) {
                         longAwaitList.add(index);

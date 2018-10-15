@@ -58,6 +58,20 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx){
+        /*new Thread(()->{
+            while(true){
+                String currentTime = DateUtil.currentTime();
+                Device device = new Device(2, "PHONECHARGERS", 0.01600, 240.89500,
+                        1.99300, 0.52280, 50.05000, currentTime, 0.00740);
+                new TcpServiceImpl().send(device, 0);
+                log.info("插口二 ");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();*/
         this.ctx = ctx;
         log.info("已经连接上了 : "+ctx.channel().remoteAddress());
         ctx.fireChannelActive();

@@ -2,9 +2,9 @@ spring:
   datasource:
       type: com.alibaba.druid.pool.DruidDataSource
       # MySQL 配置
-      url: jdbc:mysql://39.108.110.121:3306/exclusive_plug?characterEncoding=utf8&useSSL=false&serverTimezone=UTC
-      username: lin
-      password: qg2018qg
+      url: jdbc:mysql://47.107.70.23:3306/exclusive_plug?characterEncoding=utf8&useSSL=false&serverTimezone=UTC
+      username: zeng
+      password: '!qg2018QG'
       driver-class-name: com.mysql.jdbc.Driver
       initialSize: 5
       minIdle: 5

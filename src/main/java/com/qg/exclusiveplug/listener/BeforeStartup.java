@@ -55,7 +55,7 @@ public class BeforeStartup implements ApplicationRunner {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                calendar.add(Calendar.DAY_OF_MONTH, 1);
+                calendar.add(Calendar.DAY_OF_MONTH, - 1);
                 for(String machineName : machineNameList){
                     dataService.listDevicesCPByDate(machineName, sdf.format(calendar.getTime()));
                 }
