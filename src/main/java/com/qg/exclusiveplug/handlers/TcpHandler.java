@@ -6,6 +6,7 @@ import com.qg.exclusiveplug.service.TcpService;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,6 +23,8 @@ import org.springframework.stereotype.Component;
 @ChannelHandler.Sharable
 @Slf4j
 public class TcpHandler extends SimpleChannelInboundHandler<String> {
+    private static final String PONG_MSG = "2";
+
     @Autowired
     private TcpService tcpService;
 
@@ -32,14 +35,22 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
             throws Exception {
         log.info("客户端请求，Id为： "+channelHandlerContext.channel().id());
         log.info("收到客户端发来的消息: "+s);
+        sendPongMsg(channelHandlerContext);
         int result = tcpService.messageHandler(s);
-        if (result == StateEnum.OK.getState()){
+        if (result == StateEnum.OK.getStatus()){
             log.info("数据成功保存到map中");
         }else {
             log.error("数据出错");
+            channelHandlerContext.close();
+            //TODO 干嘛用的。。
             throw new ExclusivePlugException(StateEnum.ANALYSIS_ERROR);
         }
         channelHandlerContext.channel().flush();
+    }
+
+    private void sendPongMsg(ChannelHandlerContext context) {
+        context.writeAndFlush(PONG_MSG);
+        System.out.println("sent pong msg to " + context.channel().remoteAddress());
     }
 
     @Override
@@ -51,27 +62,28 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-        ctx.channel().writeAndFlush("CLOSED");
         log.info("断开连接 ... ");
         super.channelInactive(ctx);
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx){
-        /*new Thread(()->{
-            while(true){
-                String currentTime = DateUtil.currentTime();
-                Device device = new Device(2, "PHONECHARGERS", 0.01600, 240.89500,
-                        1.99300, 0.52280, 50.05000, currentTime, 0.00740);
-                new TcpServiceImpl().send(device, 0);
-                log.info("插口二 ");
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+        // IdleStateHandler 所产生的 IdleStateEvent 的处理逻辑.
+        if (evt instanceof IdleStateEvent) {
+            IdleStateEvent e = (IdleStateEvent) evt;
+            switch (e.state()) {
+                case READER_IDLE:
+                    handleReaderIdle(ctx);
+                    break;
+                default:
+                    log.info("TCP读写失败!");
+                    break;
             }
-        }).start();*/
+        }
+    }
+
+    @Override
+    public void channelActive(ChannelHandlerContext ctx){
         this.ctx = ctx;
         log.info("已经连接上了 : "+ctx.channel().remoteAddress());
         ctx.fireChannelActive();
@@ -79,6 +91,15 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
             log.debug(ctx.channel().remoteAddress() + " ");
         }
     }
+
+
+
+    protected void handleReaderIdle(ChannelHandlerContext ctx) {
+        System.err.println("---client " + ctx.channel().remoteAddress().toString() + " reader timeout, close it---");
+        ctx.close();
+    }
+
+
 
     public void send(String message){
         ctx.channel().writeAndFlush(message);

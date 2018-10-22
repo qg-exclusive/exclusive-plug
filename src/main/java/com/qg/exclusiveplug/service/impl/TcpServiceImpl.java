@@ -44,7 +44,18 @@ public class TcpServiceImpl implements TcpService {
     @Override
     public int messageHandler(String message) {
         assert message != null;
-        List<Device> devices = analysisMessage(message);
+        // 判断数据是否符合格式
+        if(FormatMatchingUtil.isServiceInfo(message)){
+            List<Device> deviceList = analysisMessage(message);
+            if (!CacheMap.containKey(CACHE_KEY)) {
+                CacheMap.put(CACHE_KEY, deviceList);
+            } else {
+                CacheMap.get(CACHE_KEY).addAll(deviceList);
+            }
+            return StateEnum.OK.getStatus();
+        }
+        return StateEnum.ANALYSIS_ERROR.getStatus();
+
         //将数据存放到Redis中进行缓存
         // TODO: 2018/9/26 0026  现在Redis不稳定，先换Map做缓存
 //        if (!redisTemplate.hasKey(CACHE_KEY)) {
@@ -56,13 +67,6 @@ public class TcpServiceImpl implements TcpService {
 //            redisTemplate.opsForList().rightPushAll(CACHE_KEY, devices);
 //        }
 //        return StateEnum.OK.getState();
-
-        if (!CacheMap.containKey(CACHE_KEY)) {
-            CacheMap.put(CACHE_KEY, devices);
-        } else {
-            CacheMap.get(CACHE_KEY).addAll(devices);
-        }
-        return StateEnum.OK.getState();
     }
 
     /**
@@ -77,8 +81,6 @@ public class TcpServiceImpl implements TcpService {
         List<String> list = Arrays.asList(parameters);
         List<Device> devices = new LinkedList<>();
         for (String s : list) {
-            // 发生信息是否符合格式
-            if(FormatMatchingUtil.isServiceInfo(s)){
                 //查看是哪个串口
                 int index = (int) s.charAt(s.length() - 1) - 48;
                 s = s.substring(0, s.length() - 1);
@@ -95,7 +97,6 @@ public class TcpServiceImpl implements TcpService {
 
                 Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
 
-                log.info("插入数据：" + device.toString());
                 // 如果需要发送数据
                 if(MyWebSocketHandler.getIndex() != 0){
                     // 向数据挖掘端发送设备信息
@@ -105,7 +106,6 @@ public class TcpServiceImpl implements TcpService {
                 }
 
                 devices.add(device);
-            }
         }
         return devices;
     }
@@ -141,6 +141,8 @@ public class TcpServiceImpl implements TcpService {
     }
 
     private void send(Device device, int status) {
+        // 待机时间
+        final long standByTime = 5L * 60 * 60;
         log.info("状态" + status);
         Data data = new Data();
         int index = device.getIndex();
@@ -150,11 +152,10 @@ public class TcpServiceImpl implements TcpService {
             if (!timeMap.containsKey(index)) {
                 timeMap.put(index, DateUtil.getCurrentDate());
             } else {
-                Date currentTime = DateUtil.getCurrentDate();
-                int diffSecond = DateUtil.diffSecond(timeMap.get(index), currentTime);
+                int diffSecond = DateUtil.diffSecond(timeMap.get(index), DateUtil.getCurrentDate());
                 log.info(device.getName() + "已挂机" + diffSecond + "秒");
                 // 判断待机持续时间
-                if (diffSecond > 5) {
+                if (diffSecond > standByTime) {
                     // 加入长时间待机警示队列
                     if (!longAwaitList.contains(index)) {
                         longAwaitList.add(index);
@@ -169,7 +170,9 @@ public class TcpServiceImpl implements TcpService {
         }else {
             // 更新最近检测时间和待机队列
             timeMap.replace(index, DateUtil.getCurrentDate());
-            longAwaitList.remove(Integer.valueOf(index));
+            if(longAwaitList.contains(index)){
+                longAwaitList.remove(Integer.valueOf(index));
+            }
         }
 
         // 发送特定串口数据

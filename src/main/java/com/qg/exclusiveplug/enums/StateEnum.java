@@ -1,7 +1,6 @@
 package com.qg.exclusiveplug.enums;
 
 import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -22,7 +21,7 @@ public enum  StateEnum {
 
     @Getter
     @Setter
-    private int state;
+    private int status;
 
     @Getter
     @Setter

@@ -51,13 +51,14 @@ aliyun:
     product: Dysmsapi
     domain: dysmsapi.aliyuncs.com
     regionId: cn-hangzhou
-    signName: OnlineZuozuo
+    signName: QG智能排插
     dateFormat: yyyy-MM-dd
     endpointName: cn-hangzhou
+    templateCode: SMS_148380226
 
 server:
   port: 8443
   ssl:
-    key-store: classpath:215069416590721.pfx
+    key-store: classpath:215068804770721.pfx
     key-store-type: PKCS12
-    key-store-password: 215069416590721
+    key-store-password: 215068804770721

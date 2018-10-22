@@ -16,7 +16,11 @@ public class FormatMatchingUtil {
      */
     public static boolean isServiceInfo(String serviceInfo) {
         String rexp = "\\b\\w*:V_\\d:[0-9]+[.][0-9]*,I_\\d:[0-9]+[.][0-9]*," +
-                "P_\\d:[0-9]+[.][0-9]*,PF_\\d:-?[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*\\b";
+                "P_\\d:[0-9]+[.][0-9]*,PF_\\d:-?[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*end" +
+                "\\w*:V_\\d:[0-9]+[.][0-9]*,I_\\d:[0-9]+[.][0-9]*," +
+                "P_\\d:[0-9]+[.][0-9]*,PF_\\d:[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*end" +
+                "\\w*:V_\\d:[0-9]+[.][0-9]*,I_\\d:[0-9]+[.][0-9]*," +
+                "P_\\d:[0-9]+[.][0-9]*,PF_\\d:[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*end\\b";
         Pattern pat = Pattern.compile(rexp);
         Matcher matcher = pat.matcher(serviceInfo);
         return matcher.matches();
