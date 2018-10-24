@@ -3,10 +3,9 @@ package com.qg.exclusiveplug.handlers;
 import com.qg.exclusiveplug.enums.StateEnum;
 import com.qg.exclusiveplug.exception.ExclusivePlugException;
 import com.qg.exclusiveplug.service.TcpService;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.timeout.IdleStateEvent;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,6 +34,7 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
             throws Exception {
         log.info("客户端请求，Id为： "+channelHandlerContext.channel().id());
         log.info("收到客户端发来的消息: "+s);
+
         sendPongMsg(channelHandlerContext);
         int result = tcpService.messageHandler(s);
         if (result == StateEnum.OK.getStatus()){
@@ -49,7 +49,12 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
     }
 
     private void sendPongMsg(ChannelHandlerContext context) {
-        context.writeAndFlush(PONG_MSG);
+        ChannelFuture channelFuture = context.writeAndFlush(PONG_MSG);
+        channelFuture.addListener((ChannelFutureListener) channelFuture1 -> {
+            if(channelFuture1.isSuccess()){
+                log.info("PONG信息已发送");
+            }
+        });
         System.out.println("sent pong msg to " + context.channel().remoteAddress());
     }
 
@@ -67,25 +72,25 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
     }
 
     @Override
+    public void handlerRemoved(ChannelHandlerContext ctx) throws Exception {
+        super.handlerRemoved(ctx);
+    }
+
+    @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
         // IdleStateHandler 所产生的 IdleStateEvent 的处理逻辑.
         if (evt instanceof IdleStateEvent) {
-            IdleStateEvent e = (IdleStateEvent) evt;
-            switch (e.state()) {
-                case READER_IDLE:
-                    handleReaderIdle(ctx);
-                    break;
-                default:
-                    log.info("TCP读写失败!");
-                    break;
-            }
+            ctx.writeAndFlush(PONG_MSG).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
+        } else {
+            super.userEventTriggered(ctx, evt);
         }
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx){
         this.ctx = ctx;
-        log.info("已经连接上了 : "+ctx.channel().remoteAddress());
+        log.info("已经连接上了 : "+ctx.channel().remoteAddress() + ":" + ctx.channel().id());
+        ctx.channel().pipeline().addLast(new IdleStateHandler(0, 0, 60));
         ctx.fireChannelActive();
         if (log.isDebugEnabled()) {
             log.debug(ctx.channel().remoteAddress() + " ");
@@ -94,7 +99,7 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
 
 
 
-    protected void handleReaderIdle(ChannelHandlerContext ctx) {
+    private void handleReaderIdle(ChannelHandlerContext ctx) {
         System.err.println("---client " + ctx.channel().remoteAddress().toString() + " reader timeout, close it---");
         ctx.close();
     }

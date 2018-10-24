@@ -1,7 +1,6 @@
 package com.qg.exclusiveplug.config;
 
 import com.qg.exclusiveplug.handlers.StringProtocolHandler;
-import com.qg.exclusiveplug.handlers.TcpHandler;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.nio.NioEventLoopGroup;
