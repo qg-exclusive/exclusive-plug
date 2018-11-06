@@ -17,10 +17,11 @@ import org.springframework.context.annotation.Configuration;
 public class DruidConfig {
     /**
      * StateViewServlet配置
+     *
      * @return
      */
     @Bean
-    public ServletRegistrationBean druidStatViewServlet(){
+    public ServletRegistrationBean druidStatViewServlet() {
         ServletRegistrationBean servletRegistrationBean = new ServletRegistrationBean<>(new StatViewServlet(), "/druid/*");
         //添加初始化参数
         //白名单：
@@ -36,7 +37,7 @@ public class DruidConfig {
     }
 
     @Bean
-    public FilterRegistrationBean druidStatFilter(){
+    public FilterRegistrationBean druidStatFilter() {
         FilterRegistrationBean filterRegistrationBean = new FilterRegistrationBean<>(new WebStatFilter());
         //添加过滤规则
         filterRegistrationBean.addUrlPatterns("/*");

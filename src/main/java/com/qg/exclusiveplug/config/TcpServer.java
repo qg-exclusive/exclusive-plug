@@ -34,16 +34,18 @@ public class TcpServer {
 
     /**
      * 开启Netty
+     *
      * @throws InterruptedException
      */
     @PostConstruct
     public void start() throws InterruptedException {
-        log.info("TCP 连接开启，端口号为: "+tcpPort+" ... ");
+        log.info("TCP 连接开启，端口号为: " + tcpPort + " ... ");
         channelFuture = serverBootstrap.bind(tcpPort).sync();
     }
 
     /**
      * 关闭 Netty
+     *
      * @throws InterruptedException
      */
     @PreDestroy

@@ -23,7 +23,7 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
     public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse,
                                    WebSocketHandler webSocketHandler, Map<String, Object> map) throws Exception {
         log.info("webSocket握手请求...");
-        if (serverHttpRequest instanceof ServletServerHttpRequest){
+        if (serverHttpRequest instanceof ServletServerHttpRequest) {
 
         }
         return true;

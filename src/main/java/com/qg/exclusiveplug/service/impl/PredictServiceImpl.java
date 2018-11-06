@@ -1,12 +1,12 @@
 package com.qg.exclusiveplug.service.impl;
 
-import com.qg.exclusiveplug.dao.DeviceMapper;
+import com.qg.exclusiveplug.dao.QueryDeviceMapper;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractBigData;
 import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.enums.DMUrl;
-import com.qg.exclusiveplug.enums.Status;
+import com.qg.exclusiveplug.enums.DMUrlEnum;
+import com.qg.exclusiveplug.enums.StatusEnum;
 import com.qg.exclusiveplug.model.PowerSum;
 import com.qg.exclusiveplug.service.PredictService;
 import com.qg.exclusiveplug.util.DateUtil;
@@ -33,14 +33,14 @@ public class PredictServiceImpl implements PredictService {
     private static int THREE = 3;
     private static int ONE = 1;
     @Autowired
-    private DeviceMapper deviceMapper;
+    private QueryDeviceMapper queryDeviceMapper;
 
     @Override
     public ResponseData predictNowPowerSumService(String time, int index) {
         if (index > THREE || index < ONE || !DateUtil.isDate(time)) {
             //参数有误
             log.error("前端传入参数有误");
-            return new ResponseData(Status.PARAMETER_ERROR.getStatus(), null);
+            return new ResponseData(StatusEnum.PARAMETER_ERROR.getStatus(), null);
         }
 
         ResponseData responseData = new ResponseData();
@@ -56,9 +56,9 @@ public class PredictServiceImpl implements PredictService {
                 String endTime = sdf.format(calendar.getTime());
                 calendar.add(Calendar.DAY_OF_MONTH, -1);
                 String startTime = sdf.format(calendar.getTime().getTime());
-                doubles[6 - i] = deviceMapper.listPowerSum(index, startTime, endTime);
+                doubles[6 - i] = queryDeviceMapper.listPowerSum(index, startTime, endTime);
                 // 判空，防止无数据的情况发生
-                if(null == doubles[6 - i]){
+                if (null == doubles[6 - i]) {
                     doubles[6 - i] = 0.0;
                 }
                 log.info("开始时间：" + startTime + "结束时间：" + endTime + "结果：" + doubles[6 - i]);
@@ -73,16 +73,16 @@ public class PredictServiceImpl implements PredictService {
 
         InteractBigData interactBigData;
         try {
-            interactBigData = HttpClientUtil.demandedCount(DMUrl.PREDICTED_POWERSUM.getDMUrl(), requestData);
+            interactBigData = HttpClientUtil.demandedCount(DMUrlEnum.PREDICTED_POWERSUM.getDMUrl(), requestData);
         } catch (IOException e) {
             log.info("连接DM失败");
-            responseData.setStatus(Status.PREDICTED_FAILED.getStatus());
+            responseData.setStatus(StatusEnum.PREDICTED_FAILED.getStatus());
             return responseData;
         }
 
         // 预测成功
-        if(null != interactBigData){
-            responseData.setStatus(Status.NORMAL.getStatus());
+        if (null != interactBigData) {
+            responseData.setStatus(StatusEnum.NORMAL.getStatus());
             Data data = new Data();
             PowerSum powerSum = new PowerSum(time, interactBigData.getPowerSum());
             data.setPowerSum(powerSum);
@@ -92,7 +92,7 @@ public class PredictServiceImpl implements PredictService {
 
         // 预测失败
         log.info("DM返回数据为空");
-        responseData.setStatus(Status.PREDICTED_FAILED.getStatus());
+        responseData.setStatus(StatusEnum.PREDICTED_FAILED.getStatus());
         return responseData;
     }
 }

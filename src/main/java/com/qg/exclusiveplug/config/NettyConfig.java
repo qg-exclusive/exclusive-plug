@@ -47,7 +47,7 @@ public class NettyConfig {
     private StringProtocolHandler tcpHandler;
 
     @Bean(name = "serverBootstrap")
-    public ServerBootstrap bootstrap(){
+    public ServerBootstrap bootstrap() {
         ServerBootstrap bootstrap = new ServerBootstrap();
         bootstrap.group(boosGroup(), workerGroup())
                 .channel(NioServerSocketChannel.class)
@@ -63,22 +63,22 @@ public class NettyConfig {
     }
 
     @Bean(name = "bossGroup", destroyMethod = "shutdownGracefully")
-    public NioEventLoopGroup boosGroup(){
+    public NioEventLoopGroup boosGroup() {
         return new NioEventLoopGroup(bossCount);
     }
 
     @Bean(name = "workerGroup", destroyMethod = "shutdownGracefully")
-    public NioEventLoopGroup workerGroup(){
+    public NioEventLoopGroup workerGroup() {
         return new NioEventLoopGroup(workerCount);
     }
 
     @Bean(name = "tcpSocketAddress")
-    public InetSocketAddress tcpPort(){
+    public InetSocketAddress tcpPort() {
         return new InetSocketAddress(tcpPort);
     }
 
     @Bean(name = "tcpChannelOptions")
-    public Map<ChannelOption<?>, Object> tcpChannelOptions(){
+    public Map<ChannelOption<?>, Object> tcpChannelOptions() {
         Map<ChannelOption<?>, Object> options = new HashMap<>(2);
         options.put(ChannelOption.SO_KEEPALIVE, keepAlive);
         options.put(ChannelOption.SO_BACKLOG, backLog);
@@ -86,12 +86,12 @@ public class NettyConfig {
     }
 
     @Bean(name = "stringEncoder")
-    public StringEncoder stringEncoder(){
+    public StringEncoder stringEncoder() {
         return new StringEncoder();
     }
 
     @Bean(name = "stringDecoder")
-    public StringDecoder stringDecoder(){
+    public StringDecoder stringDecoder() {
         return new StringDecoder();
     }
 }

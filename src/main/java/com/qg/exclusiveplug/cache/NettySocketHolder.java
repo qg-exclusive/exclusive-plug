@@ -21,7 +21,11 @@ public class NettySocketHolder {
         return map;
     }
 
-    public static void remove(NioSocketChannel nioSocketChannel) {
+    public static void removeKey(ChannelId channelId) {
+       map.remove(channelId);
+    }
+
+    public static void removeChannel(NioSocketChannel nioSocketChannel) {
         map.entrySet().stream().filter(entry -> entry.getValue() == nioSocketChannel)
                 .forEach(entry -> map.remove(entry.getKey()));
     }

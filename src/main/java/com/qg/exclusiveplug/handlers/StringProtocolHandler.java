@@ -1,15 +1,16 @@
 package com.qg.exclusiveplug.handlers;
 
 import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.SocketChannel;
-import io.netty.handler.codec.LineBasedFrameDecoder;
 import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
+import io.netty.handler.timeout.IdleStateHandler;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author WilderGao
@@ -30,10 +31,10 @@ public class StringProtocolHandler extends ChannelInitializer<SocketChannel> {
 
     @Override
     protected void initChannel(SocketChannel socketChannel) throws Exception {
-        ChannelPipeline pipeline = socketChannel.pipeline();
-        pipeline.addLast(stringDecoder);
-        pipeline.addLast(stringEncoder);
-        pipeline.addLast(tcpHandler);
-        pipeline.addLast(new LineBasedFrameDecoder(1024));
+        socketChannel.pipeline()
+                .addLast("idleStateHandler", new IdleStateHandler(10, 20, 30, TimeUnit.SECONDS))
+                .addLast(stringDecoder)
+                .addLast(stringEncoder)
+                .addLast(tcpHandler);
     }
 }

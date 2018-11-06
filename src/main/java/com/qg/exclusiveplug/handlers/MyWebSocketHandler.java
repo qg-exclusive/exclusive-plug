@@ -5,7 +5,9 @@ import com.qg.exclusiveplug.dtos.ResponseData;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
+
 import java.io.IOException;
+
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.WebSocketMessage;
@@ -24,7 +26,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
     private static WebSocketSession session = null;
     private static int index = 0;
 
-    public static int getIndex(){
+    public static int getIndex() {
         return index;
     }
 
@@ -37,7 +39,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
     @Override
     public void handleMessage(WebSocketSession webSocketSession,
                               WebSocketMessage<?> webSocketMessage) throws Exception {
-        log.info("接收信息 >> {}",webSocketMessage.getPayload());
+        log.info("接收信息 >> {}", webSocketMessage.getPayload());
         index = Integer.valueOf(String.valueOf(webSocketMessage.getPayload()).split(":")[1]);
         log.info("切换串口：" + index);
     }
@@ -45,7 +47,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession webSocketSession,
                                      Throwable throwable) throws Exception {
-        log.info("{}连接出现异常",webSocketSession.getId());
+        log.info("{}连接出现异常", webSocketSession.getId());
     }
 
     @Override
@@ -63,7 +65,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
     public static void send(ResponseData responseData) {
         try {
-            if(null != session){
+            if (null != session) {
                 session.sendMessage(new TextMessage(new Gson().toJson(responseData)));
             }
         } catch (IOException e) {

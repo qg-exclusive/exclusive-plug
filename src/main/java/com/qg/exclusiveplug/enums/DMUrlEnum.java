@@ -8,7 +8,7 @@ import lombok.AllArgsConstructor;
  * @author Chen
  */
 @AllArgsConstructor
-public enum  DMUrl {
+public enum DMUrlEnum {
 
     /**
      * 实时设备数据
@@ -18,9 +18,7 @@ public enum  DMUrl {
     /**
      * 预测当天用电量
      */
-    PREDICTED_POWERSUM("http://47.107.70.23:5050/paicha/predict/one")
-
-    ;
+    PREDICTED_POWERSUM("http://47.107.70.23:5050/paicha/predict/one");
 
     private String url;
 

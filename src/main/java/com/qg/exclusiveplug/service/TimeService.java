@@ -9,6 +9,7 @@ package com.qg.exclusiveplug.service;
 public interface TimeService {
     /**
      * 把缓存在redis中的数据保存到MySQL
+     *
      * @return 保存结果
      */
     void saveDataToMySql() throws InterruptedException;

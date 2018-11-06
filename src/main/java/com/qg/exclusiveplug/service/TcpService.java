@@ -9,8 +9,9 @@ package com.qg.exclusiveplug.service;
 public interface TcpService {
     /**
      * 对tcp传送的数据进行处理
+     *
      * @param message 传送的数据
-     * @return  处理结果，200表示正确
+     * @return 处理结果，true表示处理成功
      */
-    int messageHandler(String message);
+    boolean messageHandler(String message);
 }

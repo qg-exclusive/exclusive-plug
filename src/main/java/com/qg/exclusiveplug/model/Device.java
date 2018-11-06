@@ -21,21 +21,26 @@ public class Device implements Serializable {
      * 排插串口号
      */
     private int index;
+
     /**
      * 设备名称
      */
     private String name;
+
     /**
      * 电流
      */
     private double current;
+
     /**
      * 电压
      */
     private double voltage;
+
     /**
      * 功率
      */
+
     private double power;
 
     /**

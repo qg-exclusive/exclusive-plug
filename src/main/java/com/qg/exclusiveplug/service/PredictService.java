@@ -11,9 +11,10 @@ import com.qg.exclusiveplug.dtos.ResponseData;
 public interface PredictService {
     /**
      * 预测今天的用电量
+     *
      * @param time  当前时间
      * @param index 串口
-     * @return  预测结果
+     * @return 预测结果
      */
     ResponseData predictNowPowerSumService(String time, int index);
 }

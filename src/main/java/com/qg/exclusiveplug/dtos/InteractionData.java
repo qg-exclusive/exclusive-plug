@@ -1,6 +1,10 @@
 package com.qg.exclusiveplug.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.qg.exclusiveplug.model.DeviceInfo;
+import com.qg.exclusiveplug.model.DeviceUuid;
+import com.qg.exclusiveplug.model.User;
+import com.qg.exclusiveplug.model.UserDeviceInfo;
 import lombok.Data;
 
 /**
@@ -26,4 +30,29 @@ public class InteractionData {
      * 关键词
      */
     int key;
+
+    /**
+     * 用户验证码判断
+     */
+    String checkCodeKey;
+
+    /**
+     * 用户信息
+     */
+    User user;
+
+    /**
+     * 用户设备关联信息
+     */
+    UserDeviceInfo userDeviceInfo;
+
+    /**
+     * 设备信息
+     */
+    DeviceInfo deviceInfo;
+
+    /**
+     * 设备UUID
+     */
+    DeviceUuid deviceUuid;
 }

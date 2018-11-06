@@ -1,7 +1,6 @@
+/*
 package com.qg.exclusiveplug.listener;
 
-import com.qg.exclusiveplug.enums.SerialPort;
-import com.qg.exclusiveplug.service.DataService;
 import com.qg.exclusiveplug.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -16,36 +15,38 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+*/
 /**
  * @author Chen
  * time 2018-10-02 17:24:21
  * description 定时提取出预测数据
- */
+ *//*
+
 @Configuration
 @Order(1)
 @Profile(value = "dev")
 public class BeforeStartup implements ApplicationRunner {
 
-    @Autowired
-    DataService dataService;
-
-    /**
+    */
+/**
      * 项目启动时运行
+     *
      * @param args
-     */
+     *//*
+
     @Override
     public void run(ApplicationArguments args) {
         // 设置定时时间
         final long timeInterval = 24 * 60 * 60 * 1000;
         List<String> machineNameList = new ArrayList<>();
         // 设置设备列表
-        machineNameList.add(SerialPort.INDEX_1.getSerialPort());
-        machineNameList.add(SerialPort.INDEX_2.getSerialPort());
-        machineNameList.add(SerialPort.INDEX_3.getSerialPort());
+        machineNameList.add(SerialPortEnum.INDEX_1.getSerialPort());
+        machineNameList.add(SerialPortEnum.INDEX_2.getSerialPort());
+        machineNameList.add(SerialPortEnum.INDEX_3.getSerialPort());
 
         // 启动定时线程任务
-        new Thread(()->{
-            while(true){
+        new Thread(() -> {
+            while (true) {
                 String date = DateUtil.currentTime().split(" ")[0];
                 // 提前一天
                 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
@@ -55,8 +56,8 @@ public class BeforeStartup implements ApplicationRunner {
                 } catch (ParseException e) {
                     e.printStackTrace();
                 }
-                calendar.add(Calendar.DAY_OF_MONTH, - 1);
-                for(String machineName : machineNameList){
+                calendar.add(Calendar.DAY_OF_MONTH, -1);
+                for (String machineName : machineNameList) {
                     dataService.listDevicesCPByDate(machineName, sdf.format(calendar.getTime()));
                 }
                 try {
@@ -68,3 +69,4 @@ public class BeforeStartup implements ApplicationRunner {
         }).start();
     }
 }
+*/

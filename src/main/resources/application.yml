@@ -1,11 +1,11 @@
 # Druid 配置
 spring:
   profiles:
-    active: dev
+    active: test
   # Redis 配置
   redis:
     database: 0
-    host: 119.29.253.167
+    host: 127.0.0.1
     port: 6379
     password:
     jedis:
@@ -14,7 +14,7 @@ spring:
         max-wait: -1
         max-idle: 8
         min-idle: 0
-    timeout: 0
+    timeout: 5000
 
   devtools:
     restart:
@@ -32,7 +32,6 @@ mybatis:
   type-aliases-package: com.qg.exclusiveplug.model
   configuration.map-underscore-to-camel-case: true
 
-
 #Netty 配置
 netty:
   tcp-port: 8090
@@ -43,6 +42,12 @@ netty:
 
 logging:
   file: /root/exclusive_plug/mylog.log
+#  pattern:
+#    console: "%d - %msg%n"
+#    level:
+#  config: classpath:logback-spring.xml
+
+
 #阿里云短信配置
 aliyun:
   sms:
@@ -58,7 +63,7 @@ aliyun:
 
 server:
   port: 8443
-  ssl:
-    key-store: classpath:215068804770721.pfx
-    key-store-type: PKCS12
-    key-store-password: 215068804770721
+#  ssl:
+#    key-store: classpath:215069416590721.pfx
+#    key-store-type: PKCS12
+#    key-store-password: 215069416590721

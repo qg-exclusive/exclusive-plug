@@ -29,24 +29,20 @@ public class DateUtil {
         return formatter.format(LocalDateTime.now());
     }
 
-    public static Date getCurrentDate(){
+    public static Date getCurrentDate() throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(PATTERN);
-        try {
-            return simpleDateFormat.parse(currentTime());
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        return null;
+        return simpleDateFormat.parse(currentTime());
     }
 
 
     /**
      * 得到两个时间相差的秒数
+     *
      * @param startTime 开始时间
-     * @param endTime 结束时间
+     * @param endTime   结束时间
      * @return 相差的秒数
      */
-    public static int diffSecond(Date startTime, Date endTime){
+    public static int diffSecond(Date startTime, Date endTime) {
         return (int) ((endTime.getTime() - startTime.getTime()) / 1000);
     }
 

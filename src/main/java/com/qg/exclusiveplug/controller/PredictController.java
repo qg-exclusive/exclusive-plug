@@ -3,10 +3,8 @@ package com.qg.exclusiveplug.controller;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.service.PredictService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 
 /**
@@ -24,11 +22,12 @@ public class PredictController {
 
     /**
      * 预测今天的用电量
-     * @param interactionData   前端请求参数，包括串口号index 和时间time
-     * @return  预测之后的结果
+     *
+     * @param interactionData 前端请求参数，包括串口号index 和时间time
+     * @return 预测之后的结果
      */
     @PostMapping(value = "/nowpowersum")
-    public ResponseData predictTodayPowerSum(@RequestBody InteractionData interactionData){
+    public ResponseData predictTodayPowerSum(@RequestBody InteractionData interactionData) {
         return predictService.predictNowPowerSumService(interactionData.getTime(), interactionData.getIndex());
     }
 }

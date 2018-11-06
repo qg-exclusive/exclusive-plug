@@ -1,6 +1,6 @@
 package com.qg.exclusiveplug.enums;
 
-public enum DeviceStatus {
+public enum DeviceStatusEnum {
 
     /**
      * 断电
@@ -20,16 +20,15 @@ public enum DeviceStatus {
     /**
      * 故障
      */
-    BROKEN(3)
-    ;
+    BROKEN(3);
 
     private int index;
 
-    DeviceStatus(int index){
+    DeviceStatusEnum(int index) {
         this.index = index;
     }
 
-    public int getIndex(){
+    public int getIndex() {
         return index;
     }
 }

@@ -1,4 +1,3 @@
-/*
 package com.qg.exclusiveplug.util;
 
 import sun.misc.BASE64Decoder;
@@ -11,7 +10,8 @@ import java.security.SecureRandom;
 
 public class DESUtil {
     private static Key key;
-    private static String KEY_STR = "myKey";
+    private static String KEY_STR = "myKeys";
+
     static {
         try {
             KeyGenerator generator = KeyGenerator.getInstance("DES");
@@ -23,14 +23,12 @@ public class DESUtil {
         }
     }
 
-    */
-/**
-     * 对str进行DES加密
+    /**
+     * 加密
      *
      * @param str
      * @return
-     *//*
-
+     */
     public static String getEncryptString(String str) {
         BASE64Encoder base64en = new BASE64Encoder();
         try {
@@ -44,14 +42,12 @@ public class DESUtil {
         }
     }
 
-    */
-/**
-     * 对str进行DES解密
+    /**
+     * 解密
      *
      * @param str
      * @return
-     *//*
-
+     */
     public static String getDecryptString(String str) {
         BASE64Decoder base64De = new BASE64Decoder();
         try {
@@ -80,4 +76,3 @@ public class DESUtil {
         //System.out.println(getDecryptString("gJQ9O+q34qk="));
     }
 }
-*/

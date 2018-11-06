@@ -2,7 +2,7 @@ package com.qg.exclusiveplug.controller;
 
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.service.DeviceService;
+import com.qg.exclusiveplug.service.QueryDeviceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,17 +19,22 @@ import javax.annotation.Resource;
 @Slf4j
 @CrossOrigin
 @RequestMapping("/device")
-public class DeviceController {
+public class QueryDeviceController {
     @Resource
-    private DeviceService deviceService;
+    private QueryDeviceService queryDeviceService;
 
     @RequestMapping("/pastpowersum")
-    public ResponseData getPassPowerSum(@RequestBody InteractionData interactionData){
-        return deviceService.listPowerSum(interactionData);
+    public ResponseData getPassPowerSum(@RequestBody InteractionData interactionData) {
+        return queryDeviceService.listPowerSum(interactionData);
     }
 
     @RequestMapping("/controller")
     public ResponseData controller(@RequestBody InteractionData interactionData) {
-        return deviceService.controller(interactionData);
+        return queryDeviceService.controller(interactionData);
+    }
+
+    @RequestMapping("/hello")
+    public String con() {
+        return "hello  ss";
     }
 }

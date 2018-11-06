@@ -34,7 +34,7 @@ public class HttpClientUtil {
     public static InteractBigData demandedCount(String url, RequestData requestData) throws IOException {
         // 将Json对象转换为字符串
         Gson gson = new Gson();
-        String strJson = gson.toJson(requestData,RequestData.class);
+        String strJson = gson.toJson(requestData, RequestData.class);
         //使用帮助类HttpClients创建CloseableHttpClient对象.
         CloseableHttpClient client = HttpClients.createDefault();
         //HTTP请求类型创建HttpPost实例
