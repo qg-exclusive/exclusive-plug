@@ -2,8 +2,11 @@ package com.qg.exclusiveplug.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.Map;
 
 /**
  * @author HuaChen
@@ -14,11 +17,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
+@Builder
 public class User {
     /**
      * 用户ID
      */
-    private String userId;
+    private int userId;
 
     /**
      * 用户名
@@ -43,5 +47,10 @@ public class User {
     /**
      * 用户所拥有的接口
      */
-    private String userDeviceIndexs;
+    private int[] userDeviceIndexs;
+
+    /**
+     * 接口与权限对应
+     */
+    private Map<Integer, Integer> indexPrivilegeMap;
 }

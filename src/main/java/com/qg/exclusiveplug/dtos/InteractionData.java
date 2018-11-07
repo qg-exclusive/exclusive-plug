@@ -55,4 +55,14 @@ public class InteractionData {
      * 设备UUID
      */
     DeviceUuid deviceUuid;
+
+    /**
+     * uuid
+     */
+    String uuid;
+
+    /**
+     * 设备名字
+     */
+    String machineName;
 }

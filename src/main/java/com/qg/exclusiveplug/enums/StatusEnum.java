@@ -40,9 +40,24 @@ public enum StatusEnum {
     USER_ISNOEXIST("4023"),
 
     /**
+     * 用户未登陆
+     */
+    USER_ISNOLOGIN("4030"),
+
+    /**
+     * 用户权限不足
+     */
+    USER_HASNOPRIVILEGE("4031"),
+
+    /**
      * 验证码未发送或已过时
      */
-    USER_CHECKCODEERROR("4024")
+    USER_CHECKCODEERROR("4024"),
+
+    /**
+     * 不存在该端口的设备
+     */
+    DEVICE_ISNOEXIST("4040")
     ;
 
     private String status;

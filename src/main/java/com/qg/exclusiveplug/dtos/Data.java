@@ -2,7 +2,9 @@ package com.qg.exclusiveplug.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.qg.exclusiveplug.model.Device;
+import com.qg.exclusiveplug.model.DeviceInfo;
 import com.qg.exclusiveplug.model.PowerSum;
+import com.qg.exclusiveplug.model.User;
 
 import java.util.List;
 
@@ -44,4 +46,16 @@ public class Data {
      * 长时间待机队列
      */
     List<Integer> longAwaitList;
+
+    /**
+     * 用户信息
+     */
+    User user;
+
+    /**
+     * 设备信息
+     */
+    DeviceInfo deviceInfo;
+
+
 }

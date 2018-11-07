@@ -1,4 +1,4 @@
-package com.qg.exclusiveplug.cache;
+package com.qg.exclusiveplug.map;
 
 import io.netty.channel.ChannelId;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -6,7 +6,7 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class NettySocketHolder {
+public class NettyChannelHolder {
     private static final Map<ChannelId, NioSocketChannel> map = new ConcurrentHashMap<>(16);
 
     public static void put(ChannelId channelId, NioSocketChannel socketChannel) {

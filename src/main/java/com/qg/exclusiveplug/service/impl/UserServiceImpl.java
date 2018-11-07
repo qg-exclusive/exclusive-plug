@@ -1,13 +1,16 @@
 package com.qg.exclusiveplug.service.impl;
 
 import com.aliyuncs.exceptions.ClientException;
+import com.qg.exclusiveplug.dao.ActionDeviceMapper;
 import com.qg.exclusiveplug.dao.UserMapper;
+import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.SmsEnum;
 import com.qg.exclusiveplug.enums.StatusEnum;
 import com.qg.exclusiveplug.enums.UserEnum;
 import com.qg.exclusiveplug.model.User;
+import com.qg.exclusiveplug.model.UserDeviceInfo;
 import com.qg.exclusiveplug.service.UserService;
 import com.qg.exclusiveplug.util.DigestUtil;
 import com.qg.exclusiveplug.util.FormatMatchingUtil;
@@ -18,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -40,6 +44,9 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private ActionDeviceMapper actionDeviceMapper;
 
     /**
      * 增加新的用户
@@ -165,8 +172,7 @@ public class UserServiceImpl implements UserService {
 
             if (null != user) {
                 log.info("账号--{}--登陆成功", userPhone);
-                httpSession.setAttribute("user", user);
-                responseData.setStatus(StatusEnum.NORMAL.getStatus());
+                responseData = doLogin(user, httpSession);
             } else {
                 log.info("账号--{}--用户账号或密码错误", userPhone);
                 responseData.setStatus(StatusEnum.USER_ACCOUNTERROR.getStatus());
@@ -207,8 +213,7 @@ public class UserServiceImpl implements UserService {
                     if (spilt[0].equals(UserEnum.LOGIN.getStatus()) && spilt[1].equals(checkCode)
                             && (System.currentTimeMillis() - Long.parseLong(spilt[2])) / (60 * 1000) < 5) {
 
-                        httpSession.setAttribute("user", user);
-                        responseData.setStatus(StatusEnum.NORMAL.getStatus());
+                        responseData = doLogin(user, httpSession);
                     } else {
                         log.info("验证码错误或过时");
                         responseData.setStatus(StatusEnum.USER_CHECKCODEERROR.getStatus());
@@ -249,6 +254,29 @@ public class UserServiceImpl implements UserService {
             responseData.setStatus(StatusEnum.RUN_ERROR.getStatus());
             e.printStackTrace();
         }
+
+        return responseData;
+    }
+
+    private ResponseData doLogin(User user, HttpSession httpSession) {
+        ResponseData responseData = new ResponseData();
+
+        // 得到用户所有的端口以及权限
+        List<UserDeviceInfo> userDeviceInfoList = actionDeviceMapper.listUserDeviceIndex(user.getUserId());
+        Map<Integer, Integer> indexPrivilegeMap = new HashMap<>();
+        for (UserDeviceInfo userDeviceInfo : userDeviceInfoList) {
+            indexPrivilegeMap.put(userDeviceInfo.getDeviceIndex(), userDeviceInfo.getUserPrivilege());
+        }
+        user.setIndexPrivilegeMap(indexPrivilegeMap);
+
+        // 注入session
+        httpSession.setAttribute("user", user);
+
+        // 返回用户所有的端口以及权限
+        Data data = new Data();
+        data.setUser(User.builder().indexPrivilegeMap(indexPrivilegeMap).build());
+        responseData.setStatus(StatusEnum.NORMAL.getStatus());
+        responseData.setData(data);
 
         return responseData;
     }

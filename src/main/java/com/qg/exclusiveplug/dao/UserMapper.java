@@ -5,6 +5,8 @@ import com.qg.exclusiveplug.model.UserDeviceInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface UserMapper {
     /**
@@ -35,20 +37,11 @@ public interface UserMapper {
     User getUserByUserId(int userId);
 
     /**
-     * 根据用户ID得到用户用电器权限
+     * 根据用户ID查询用户与设备的关联信息
      * @param userId 用户ID
-     * @return 用户信息
+     * @return 查询结果
      */
-    User getPrivilegeByUserId(int userId);
+    List<UserDeviceInfo> getUserDeviceInfoByUserId(int userId);
 
-    /**
-     *
-     * @param userDeviceInfo
-     * @return
-     */
-    int addUserDeviceInfo(UserDeviceInfo userDeviceInfo);
 
-    int updateUserDeviceInfo(UserDeviceInfo userDeviceInfo);
-
-    UserDeviceInfo queryUserDeviceInfo(int deviceIndex);
 }

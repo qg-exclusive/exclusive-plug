@@ -1,4 +1,4 @@
-package com.qg.exclusiveplug.cache;
+package com.qg.exclusiveplug.map;
 
 import com.qg.exclusiveplug.model.User;
 import org.springframework.web.socket.WebSocketSession;

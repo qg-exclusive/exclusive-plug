@@ -18,7 +18,7 @@ import javax.annotation.Resource;
 @RestController
 @Slf4j
 @CrossOrigin
-@RequestMapping("/device")
+@RequestMapping("/querydevice")
 public class QueryDeviceController {
     @Resource
     private QueryDeviceService queryDeviceService;
@@ -28,13 +28,4 @@ public class QueryDeviceController {
         return queryDeviceService.listPowerSum(interactionData);
     }
 
-    @RequestMapping("/controller")
-    public ResponseData controller(@RequestBody InteractionData interactionData) {
-        return queryDeviceService.controller(interactionData);
-    }
-
-    @RequestMapping("/hello")
-    public String con() {
-        return "hello  ss";
-    }
 }
