@@ -1,6 +1,8 @@
 package com.qg.exclusiveplug.handlers;
 
+import com.qg.exclusiveplug.map.NettyChannelHolder;
 import com.qg.exclusiveplug.service.TcpService;
+import com.qg.exclusiveplug.util.FormatMatchingUtil;
 import io.netty.channel.*;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.handler.timeout.ReadTimeoutException;
@@ -9,6 +11,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author WilderGao
@@ -21,12 +26,11 @@ import org.springframework.stereotype.Component;
 @ChannelHandler.Sharable
 @Slf4j
 public class TcpHandler extends SimpleChannelInboundHandler<String> {
+    private int loss_connect_time = 0;
     private static final String PONG_MSG = "2";
 
     @Autowired
     private TcpService tcpService;
-
-    private static ChannelHandlerContext ctx = null;
 
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, String message) {
@@ -35,12 +39,37 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
 
         sendPongMsg(channelHandlerContext);
 
-        if (tcpService.messageHandler(message)) {
-            log.info("数据成功保存到map中");
+        if(FormatMatchingUtil.isServiceInfo(message)){
+            tcpService.messageHandler(message);
+
         } else {
-            log.error("数据出错");
-            channelHandlerContext.close();
+            if(FormatMatchingUtil.isDeviceIndexs(message)){
+                String[] plugs = message.split(":");
+                for (int i = 1; i < plugs.length - 1; i++) {
+                    Integer deviceIndex = Integer.valueOf(plugs[i]);
+                    if(NettyChannelHolder.containsKey(deviceIndex)) {
+                        log.info("NettyChannelHolder已包含该端口-->{}", plugs[i]);
+                        List<ChannelHandlerContext> channelHandlerContextList = NettyChannelHolder.get(deviceIndex);
+
+                        if(!channelHandlerContextList.contains(channelHandlerContext)) {
+                            channelHandlerContextList.add(channelHandlerContext);
+                            log.info("NettyChannelHolder新增端口-->{}", plugs[i]);
+                        }
+                    } else {
+                        log.info("NettyChannelHolder端口已存在-->{}", plugs[i]);
+
+                        List<ChannelHandlerContext> channelHandlerContextList = new ArrayList<>();
+                        channelHandlerContextList.add(channelHandlerContext);
+                        NettyChannelHolder.put(deviceIndex, channelHandlerContextList);
+                    }
+
+                }
+            } else {
+                log.info("数据格式错误");
+                channelHandlerContext.close();
+            }
         }
+
         channelHandlerContext.channel().flush();
     }
 
@@ -70,6 +99,7 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
+        NettyChannelHolder.removeChannel(ctx);
         log.info("断开连接 ... ");
         super.channelInactive(ctx);
     }
@@ -85,8 +115,12 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
         // IdleStateHandler 所产生的 IdleStateEvent 的处理逻辑.
         if (evt instanceof IdleStateEvent) {
             log.info("检查通道连接状态 >> {}", ctx.channel().remoteAddress());
-            ctx.writeAndFlush(PONG_MSG).addListener(ChannelFutureListener.CLOSE_ON_FAILURE);
-//            ctx.close();
+            loss_connect_time++;
+            if(loss_connect_time > 2){
+                log.info("关闭不活动的连接 >> {}", ctx.channel().remoteAddress());
+                NettyChannelHolder.removeChannel(ctx);
+                ctx.channel().close();
+            }
         } else {
             super.userEventTriggered(ctx, evt);
         }
@@ -94,19 +128,14 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) {
-        this.ctx = ctx;
         log.info("已经连接上了 : " + ctx.channel().remoteAddress() + ":" + ctx.channel().id());
         ctx.fireChannelActive();
     }
 
-
-    private void handleReaderIdle(ChannelHandlerContext ctx) {
-        System.err.println("---client " + ctx.channel().remoteAddress().toString() + " reader timeout, close it---");
-        ctx.close();
+    public void send(Integer deviceIndex, String message) {
+        for(ChannelHandlerContext ctx : NettyChannelHolder.get(deviceIndex)) {
+            ctx.writeAndFlush(message);
+        }
     }
 
-
-    public void send(String message) {
-        ctx.channel().writeAndFlush(message);
-    }
 }

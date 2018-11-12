@@ -42,7 +42,7 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
         // 发送串口和控制开关信息
         String message = "#" + index + "-" + key + "$";
         log.info("控制开关" + message);
-        new TcpHandler().send(message);
+        new TcpHandler().send(index, message);
 
         // 将设备移出待机队列
         if (LongWaitList.contains(index)) {
@@ -69,23 +69,23 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
     @Override
     public ResponseData addDevice(InteractionData interactionData, HttpSession httpSession) {
         ResponseData responseData = new ResponseData();
-        int userId = (int) httpSession.getAttribute("user");
-        int deviceIndex = interactionData.getIndex();
+        int userId = ((User) httpSession.getAttribute("user")).getUserId();
         String uuid = interactionData.getUuid();
-        log.info("增加设备-->>用户ID:{},端口:{},uuid:{}", userId, deviceIndex, uuid);
+        log.info("增加设备-->>用户ID:{},端口:{},uuid:{}", userId, uuid);
 
-        if(userId != 0 && 0 != deviceIndex && null != uuid) {
+        if (null != uuid) {
             // 取出出厂设置中该UUID对应的端口与权限
             DeviceUuid deviceUuid = actionDeviceMapper.queryDeviceUuidByUuid(uuid);
-            if(0 != deviceUuid.getDeviceIndex()) {
+            int deviceIndex = deviceUuid.getDeviceIndex();
+            if (0 != deviceIndex) {
                 int userPrivilege = deviceUuid.getPrivilege();
-                log.info("增加设备-->>{}对应的端口:{}，权限:{}", uuid, deviceUuid.getDeviceIndex(), userPrivilege);
+                log.info("增加设备-->>{}对应的端口:{}，权限:{}", uuid, deviceIndex, userPrivilege);
 
                 // 得到用户关联设备信息
                 UserDeviceInfo userDeviceInfo = actionDeviceMapper.queryUserDeviceInfo(userId, deviceIndex);
 
                 // 用户是否已跟该用电器关联
-                if(null == userDeviceInfo) {
+                if (null == userDeviceInfo) {
                     actionDeviceMapper.addUserDeviceInfo(new UserDeviceInfo(userId, deviceIndex, userPrivilege));
                 } else {
                     // 更改权限
@@ -95,11 +95,11 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
 
                 responseData.setStatus(StatusEnum.NORMAL.getStatus());
                 log.info("增加设备-->>响应成功");
-            }else {
+            } else {
                 responseData.setStatus(StatusEnum.DEVICE_ISNOEXIST.getStatus());
                 log.info("增加设备-->>设备不存在");
             }
-        }else{
+        } else {
             responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
             log.info("增加设备-->>前端参数错误");
         }
@@ -117,14 +117,21 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
     public ResponseData addDeviceInfo(InteractionData interactionData, HttpSession httpSession) {
         ResponseData responseData = new ResponseData();
         DeviceInfo deviceInfo = interactionData.getDeviceInfo();
-        if(null != deviceInfo) {
+        if (null != deviceInfo) {
+            int deviceIndex= deviceInfo.getDeviceIndex();
             double deviceWorkPower = deviceInfo.getDeviceWorkPower();
             double deviceStandbyPower = deviceInfo.getDeviceStandbyPower();
             log.info("增加用户关联设备信息-->>工作功率：{}，待机功率；{}，是否自动开关：{}",
                     deviceWorkPower, deviceStandbyPower, deviceInfo.getAutoClose());
 
-            if(deviceWorkPower != 0 && deviceStandbyPower != 0) {
-                actionDeviceMapper.addDeviceInfo(deviceInfo);
+            if (deviceWorkPower != 0 && deviceStandbyPower != 0) {
+
+                DeviceInfo deviceInfo1 = actionDeviceMapper.queryDeviceInfo(deviceIndex);
+                if (null != deviceInfo1) {
+                    actionDeviceMapper.updateDeviceInfo(deviceInfo);
+                } else {
+                    actionDeviceMapper.addDeviceInfo(deviceInfo);
+                }
 
                 Data data = new Data();
                 data.setDeviceInfo(deviceInfo);
@@ -136,7 +143,7 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
                 responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
                 log.info("增加用户关联设备信息-->>前端参数错误");
             }
-        }else {
+        } else {
             responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
             log.info("增加用户关联设备信息-->>前端参数错误");
         }
@@ -153,18 +160,14 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
     public ResponseData queryDeviceInfo(InteractionData interactionData, HttpSession httpSession) {
         ResponseData responseData = new ResponseData();
         int deviceIndex = interactionData.getIndex();
-        if(deviceIndex != 0) {
-            DeviceInfo deviceInfo = actionDeviceMapper.queryDeviceInfo(deviceIndex);
 
-            Data data = new Data();
-            data.setDeviceInfo(deviceInfo);
-            responseData.setData(data);
-            responseData.setStatus(StatusEnum.NORMAL.getStatus());
-            log.info("查看用户关联设备信息-->>请求结束");
-        } else {
-            responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
-            log.info("查看用户关联设备信息-->>前端参数错误");
-        }
+        DeviceInfo deviceInfo = actionDeviceMapper.queryDeviceInfo(deviceIndex);
+
+        Data data = new Data();
+        data.setDeviceInfo(deviceInfo);
+        responseData.setData(data);
+        responseData.setStatus(StatusEnum.NORMAL.getStatus());
+        log.info("查看用户关联设备信息-->>请求结束");
         return responseData;
     }
 
@@ -180,8 +183,8 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
         ResponseData responseData = new ResponseData();
 
         DeviceInfo deviceInfo = interactionData.getDeviceInfo();
-        if(null != deviceInfo) {
-            if(actionDeviceMapper.updateDeviceInfo(deviceInfo) > 0) {
+        if (null != deviceInfo) {
+            if (actionDeviceMapper.updateDeviceInfo(deviceInfo) > 0) {
                 Data data = new Data();
                 data.setDeviceInfo(actionDeviceMapper.queryDeviceInfo(deviceInfo.getDeviceIndex()));
                 responseData.setData(data);
@@ -209,8 +212,8 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
     @Override
     public ResponseData updateDeviceName(InteractionData interactionData, HttpSession httpSession) {
         String machineName = interactionData.getMachineName();
-        if(null != machineName && !machineName.equals("")) {
-        //TODO 修改端口名称
+        if (null != machineName && !machineName.equals("")) {
+            //TODO 修改端口名称
         }
         return new ResponseData();
     }
@@ -243,6 +246,25 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
         data.setUser(User.builder().indexPrivilegeMap(indexPrivilegeMap).build());
         responseData.setStatus(StatusEnum.NORMAL.getStatus());
         responseData.setData(data);
+        return responseData;
+    }
+
+    /**
+     * 获取设备被系统操作日志
+     *
+     * @param interactionData 端口号
+     * @return 日志信息
+     */
+    @Override
+    public ResponseData queryDeviceLog(InteractionData interactionData) {
+        log.info("获取设备被系统操作日志-->>端口号：{}", interactionData.getIndex());
+
+        ResponseData responseData = new ResponseData();
+        Data data = new Data();
+        data.setDeviceLog(actionDeviceMapper.queryDeviceLog(interactionData.getIndex()));
+
+        responseData.setData(data);
+        responseData.setStatus(StatusEnum.NORMAL.getStatus());
         return responseData;
     }
 

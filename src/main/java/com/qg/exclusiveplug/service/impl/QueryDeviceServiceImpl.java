@@ -5,18 +5,13 @@ import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.StatusEnum;
-import com.qg.exclusiveplug.handlers.TcpHandler;
-import com.qg.exclusiveplug.map.LongWaitList;
-import com.qg.exclusiveplug.map.TimeMap;
 import com.qg.exclusiveplug.model.PowerSum;
-import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.service.QueryDeviceService;
 import com.qg.exclusiveplug.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.servlet.http.HttpSession;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -38,9 +33,10 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
      */
     @Override
     public ResponseData listPowerSum(InteractionData interactionData) {
+        log.info("得到用电量 -->> 进入");
         if (interactionData.getKey() > 6 || interactionData.getKey() < 3 || !DateUtil.isTimeLegal(interactionData.getTime())) {
             //参数有误
-            log.error("前端传入参数有误");
+            log.error("得到用电量 -->> 前端传入参数有误");
             return new ResponseData(StatusEnum.PARAMETER_ERROR.getStatus(), null);
         }
         ResponseData responseData = new ResponseData();

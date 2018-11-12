@@ -11,7 +11,6 @@ public interface TcpService {
      * 对tcp传送的数据进行处理
      *
      * @param message 传送的数据
-     * @return 处理结果，true表示处理成功
      */
-    boolean messageHandler(String message);
+    void messageHandler(String message);
 }

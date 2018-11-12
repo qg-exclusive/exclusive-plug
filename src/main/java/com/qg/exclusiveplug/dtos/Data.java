@@ -1,10 +1,7 @@
 package com.qg.exclusiveplug.dtos;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.qg.exclusiveplug.model.Device;
-import com.qg.exclusiveplug.model.DeviceInfo;
-import com.qg.exclusiveplug.model.PowerSum;
-import com.qg.exclusiveplug.model.User;
+import com.qg.exclusiveplug.model.*;
 
 import java.util.List;
 
@@ -57,5 +54,9 @@ public class Data {
      */
     DeviceInfo deviceInfo;
 
+    /**
+     * 设备被操作日志
+     */
+    DeviceLog deviceLog;
 
 }

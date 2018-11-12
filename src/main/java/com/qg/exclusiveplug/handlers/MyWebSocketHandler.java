@@ -2,16 +2,17 @@ package com.qg.exclusiveplug.handlers;
 
 import com.google.gson.Gson;
 import com.qg.exclusiveplug.dtos.ResponseData;
+import com.qg.exclusiveplug.map.WebSocketHolder;
+import com.qg.exclusiveplug.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
 
 import java.io.IOException;
-
-import org.springframework.web.socket.CloseStatus;
-import org.springframework.web.socket.WebSocketHandler;
-import org.springframework.web.socket.WebSocketMessage;
-import org.springframework.web.socket.WebSocketSession;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author WilderGao
@@ -23,16 +24,9 @@ import org.springframework.web.socket.WebSocketSession;
 @Slf4j
 public class MyWebSocketHandler implements WebSocketHandler {
 
-    private static WebSocketSession session = null;
-    private static int index = 0;
-
-    public static int getIndex() {
-        return index;
-    }
-
     @Override
     public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
-        session = webSocketSession;
+
         log.info("成功建立连接");
     }
 
@@ -40,8 +34,28 @@ public class MyWebSocketHandler implements WebSocketHandler {
     public void handleMessage(WebSocketSession webSocketSession,
                               WebSocketMessage<?> webSocketMessage) throws Exception {
         log.info("接收信息 >> {}", webSocketMessage.getPayload());
-        index = Integer.valueOf(String.valueOf(webSocketMessage.getPayload()).split(":")[1]);
-        log.info("切换串口：" + index);
+
+        Map<Integer, Integer> integerIntegermap = ((User) webSocketSession.getAttributes()
+                .get(String.valueOf(webSocketSession.getRemoteAddress()))).getIndexPrivilegeMap();
+
+        int deviceIndex = Integer.valueOf(String.valueOf(webSocketMessage.getPayload()).split(":")[1]);
+
+        log.info("切换串口：" + deviceIndex);
+
+        // 判断权限
+        if(integerIntegermap.containsKey(deviceIndex)) {
+            if(WebSocketHolder.containsKey(deviceIndex)) {
+                List<WebSocketSession> websocketSessionList = WebSocketHolder.getWebsocketSessionList(deviceIndex);
+                if (!websocketSessionList.contains(webSocketSession)) {
+                    websocketSessionList.add(webSocketSession);
+                }
+
+            } else {
+                List<WebSocketSession> websocketSessionList = new ArrayList<>();
+                websocketSessionList.add(webSocketSession);
+                WebSocketHolder.put(deviceIndex, websocketSessionList);
+            }
+        }
     }
 
     @Override
@@ -53,8 +67,19 @@ public class MyWebSocketHandler implements WebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession,
                                       CloseStatus closeStatus) throws Exception {
-        index = 0;
-        session = null;
+        Map<Integer, Integer> integerIntegermap = ((User) webSocketSession.getAttributes()
+                .get(String.valueOf(webSocketSession.getRemoteAddress()))).getIndexPrivilegeMap();
+
+        Iterator<Integer> integerIterator = integerIntegermap.keySet().iterator();
+        while(integerIterator.hasNext()) {
+            List<WebSocketSession> webSocketSessionList = WebSocketHolder.getWebsocketSessionList(integerIterator.next());
+            for (WebSocketSession webSocketSession1 : webSocketSessionList) {
+                if (webSocketSession1 == webSocketSession) {
+                    webSocketSessionList.remove(webSocketSession1);
+                }
+            }
+        }
+
         log.info("Socket会话结束，即将移除socket");
     }
 
@@ -63,14 +88,19 @@ public class MyWebSocketHandler implements WebSocketHandler {
         return false;
     }
 
-    public static void send(ResponseData responseData) {
-        try {
-            if (null != session) {
-                session.sendMessage(new TextMessage(new Gson().toJson(responseData)));
+    /**
+     * 发送某一端口的数据给在线用户
+     * @param deviceIndex 产生的端口数据
+     * @param responseData 返回数据
+     */
+    public static void send(int deviceIndex, ResponseData responseData) {
+        List<WebSocketSession> websocketSessionList = WebSocketHolder.getWebsocketSessionList(deviceIndex);
+        for (WebSocketSession webSocketSession : websocketSessionList) {
+            try {
+                webSocketSession.sendMessage(new TextMessage(new Gson().toJson(responseData)));
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        } catch (IOException e) {
-            log.error("发送失败");
-            e.printStackTrace();
         }
     }
 }

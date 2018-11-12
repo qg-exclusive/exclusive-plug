@@ -28,6 +28,7 @@ public class QueryHandlerInterceptor implements HandlerInterceptor {
             if(indexPrivilegeMap.containsKey(index)) {
                 return true;
             } else {
+                log.info("用户权限不足");
                 responseData.setStatus(StatusEnum.USER_HASNOPRIVILEGE.getStatus());
             }
         } else {
@@ -35,7 +36,7 @@ public class QueryHandlerInterceptor implements HandlerInterceptor {
             responseData.setStatus(StatusEnum.USER_ISNOLOGIN.getStatus());
         }
         httpServletResponse.getWriter().write(new Gson().toJson(responseData));
-        return true;
+        return false;
     }
 
     @Override

@@ -13,6 +13,7 @@ import com.qg.exclusiveplug.enums.StatusEnum;
 import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
 import com.qg.exclusiveplug.map.LongWaitList;
 import com.qg.exclusiveplug.map.TimeMap;
+import com.qg.exclusiveplug.map.WebSocketHolder;
 import com.qg.exclusiveplug.model.Device;
 import com.qg.exclusiveplug.service.TcpService;
 import com.qg.exclusiveplug.util.DateUtil;
@@ -40,7 +41,7 @@ public class TcpServiceImpl implements TcpService {
     private static final String CACHE_KEY = "devices";
 
     @Override
-    public boolean messageHandler(String message) {
+    public void messageHandler(String message) {
         assert message != null;
         List<Device> devices = analysisMessage(message);
 
@@ -49,7 +50,6 @@ public class TcpServiceImpl implements TcpService {
         } else {
             CacheMap.get(CACHE_KEY).addAll(devices);
         }
-        return true;
     }
 
     /**
@@ -82,7 +82,7 @@ public class TcpServiceImpl implements TcpService {
 
 
             // 如果需要发送数据
-            if (MyWebSocketHandler.getIndex() != 0) {
+            if (WebSocketHolder.containsKey(index)) {
                 // 向数据挖掘端发送设备信息
                 int status = sendDeviceToDM(device);
                 // 更新待机信息
@@ -133,18 +133,15 @@ public class TcpServiceImpl implements TcpService {
     }
 
     private void send(Device device, int status) {
-        // 发送特定串口数据
-        if (device.getIndex() == MyWebSocketHandler.getIndex()) {
-            // 设置交互数据
-            Data data = new Data();
-            data.setDevice(device);
-            data.setStatus(status);
-            data.setLongAwaitList(LongWaitList.getLongWaitList());
-            ResponseData responseData = new ResponseData();
-            responseData.setStatus(StatusEnum.NORMAL.getStatus());
-            responseData.setData(data);
-            MyWebSocketHandler.send(responseData);
-        }
+        // 设置交互数据
+        Data data = new Data();
+        data.setDevice(device);
+        data.setStatus(status);
+        data.setLongAwaitList(LongWaitList.getLongWaitList());
+        ResponseData responseData = new ResponseData();
+        responseData.setStatus(StatusEnum.NORMAL.getStatus());
+        responseData.setData(data);
+        MyWebSocketHandler.send(device.getIndex(), responseData);
     }
 
     /**

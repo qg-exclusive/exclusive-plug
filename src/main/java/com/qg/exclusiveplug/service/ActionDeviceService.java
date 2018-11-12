@@ -59,4 +59,11 @@ public interface ActionDeviceService {
      * @return 操作结果 若成功则返回设备操作信息
      */
     ResponseData delDevice(InteractionData interactionData, HttpSession httpSession);
+
+    /**
+     * 获取设备被系统操作日志
+     * @param interactionData 端口号
+     * @return 日志信息
+     */
+    ResponseData queryDeviceLog(InteractionData interactionData);
 }

@@ -5,13 +5,11 @@ import com.qg.exclusiveplug.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.session.StandardSessionFacade;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 import javax.websocket.HandshakeResponse;
 import javax.websocket.server.HandshakeRequest;
@@ -27,6 +25,7 @@ import javax.websocket.server.ServerEndpointConfig;
 @EnableWebSocket
 @Slf4j
 public class WebSocketConfig extends ServerEndpointConfig.Configurator implements WebSocketConfigurer {
+    private int loss_connect_time = 0;
     @Autowired
     private WebSocketHandler handler;
 
@@ -47,8 +46,8 @@ public class WebSocketConfig extends ServerEndpointConfig.Configurator implement
         super.modifyHandshake(sec, request, response);
     }
 
-    @Bean
+    /*@Bean
     public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();
-    }
+    }*/
 }

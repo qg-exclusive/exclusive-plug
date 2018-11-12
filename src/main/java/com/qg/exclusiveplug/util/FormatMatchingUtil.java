@@ -17,14 +17,19 @@ public class FormatMatchingUtil {
      * @return 符合返回true，否则为false
      */
     public static boolean isServiceInfo(String serviceInfo) {
-        String rexp = "\\b\\w*:V_\\d:[0-9]+[.][0-9]*,I_\\d:[0-9]+[.][0-9]*," +
-                "P_\\d:[0-9]+[.][0-9]*,PF_\\d:-?[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*end" +
-                "\\w*:V_\\d:[0-9]+[.][0-9]*,I_\\d:[0-9]+[.][0-9]*," +
-                "P_\\d:[0-9]+[.][0-9]*,PF_\\d:-?[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*end" +
-                "\\w*:V_\\d:[0-9]+[.][0-9]*,I_\\d:[0-9]+[.][0-9]*," +
-                "P_\\d:[0-9]+[.][0-9]*,PF_\\d:-?[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*end\\b";
+        String rexp = "(\\w*:V_\\d:[0-9]+[.][0-9]*,I_\\d:[0-9]+[.][0-9]*,P_\\d:[0-9]+[.][0-9]*,PF_\\d:[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*end).*";
         Pattern pat = Pattern.compile(rexp);
         Matcher matcher = pat.matcher(serviceInfo);
+        return matcher.matches();
+    }
+
+    /**
+     * 判断嵌入式传来的设备信息是否为注册验证信息
+     */
+    public static boolean isDeviceIndexs(String DeviceIndexs) {
+        String rexp = "\\bDeviceIndexs(:\\d)+:DeviceIndexs\\b";
+        Pattern pat = Pattern.compile(rexp);
+        Matcher matcher = pat.matcher(DeviceIndexs);
         return matcher.matches();
     }
 

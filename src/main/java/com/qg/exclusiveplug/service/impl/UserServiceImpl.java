@@ -9,6 +9,7 @@ import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.SmsEnum;
 import com.qg.exclusiveplug.enums.StatusEnum;
 import com.qg.exclusiveplug.enums.UserEnum;
+import com.qg.exclusiveplug.map.HttpSessionHandler;
 import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.model.UserDeviceInfo;
 import com.qg.exclusiveplug.service.UserService;
@@ -271,6 +272,7 @@ public class UserServiceImpl implements UserService {
 
         // 注入session
         httpSession.setAttribute("user", user);
+        HttpSessionHandler.put(user.getUserId(), httpSession);
 
         // 返回用户所有的端口以及权限
         Data data = new Data();

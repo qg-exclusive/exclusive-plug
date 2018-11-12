@@ -54,7 +54,7 @@
         DELETE FROM device_info
         WHERE device_index = ${deviceIndex}
     </delete>
-    <select id="queryUserDeviceInfo" resultType="int">
+    <select id="queryUserDeviceInfo" resultType="UserDeviceInfo">
         SELECT device_index, user_privilege
         FROM user_device
         WHERE user_id = ${userId}
@@ -74,6 +74,11 @@
         SELECT device_index, user_privilege
         FROM user_device
         WHERE user_id = ${userId}
+    </select>
+    <select id="queryDeviceLog" resultType="deviceLog">
+        SELECT *
+        FROM device_log
+        WHERE device_index = ${deviceIndex}
     </select>
 
 </mapper>

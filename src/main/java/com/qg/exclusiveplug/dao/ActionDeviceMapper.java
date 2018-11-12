@@ -1,6 +1,7 @@
 package com.qg.exclusiveplug.dao;
 
 import com.qg.exclusiveplug.model.DeviceInfo;
+import com.qg.exclusiveplug.model.DeviceLog;
 import com.qg.exclusiveplug.model.DeviceUuid;
 import com.qg.exclusiveplug.model.UserDeviceInfo;
 import org.apache.ibatis.annotations.Mapper;
@@ -38,7 +39,7 @@ public interface ActionDeviceMapper {
      * @param userId 用户ID
      * @return 设备端口以及权限
      */
-    List<UserDeviceInfo> listUserDeviceIndex(int userId);
+    List<UserDeviceInfo> listUserDeviceIndex(@Param("userId") int userId);
 
     /**
      * 删除与用户关联的设备
@@ -74,12 +75,19 @@ public interface ActionDeviceMapper {
      * @param deviceIndex 设备端口
      * @return 操作结果
      */
-    DeviceInfo queryDeviceInfo(int deviceIndex);
+    DeviceInfo queryDeviceInfo(@Param("deviceIndex") int deviceIndex);
 
     /**
      * 删除设备信息
      * @param deviceIndex 设备端口
      * @return 操作结果
      */
-    int delDeviceInfo(int deviceIndex);
+    int delDeviceInfo(@Param("deviceIndex") int deviceIndex);
+
+    /**
+     * 查看该端口被系统操作的日志信息
+     * @param deviceIndex 设备端口
+     * @return 日志信息
+     */
+    DeviceLog queryDeviceLog(@Param("deviceIndex") int deviceIndex);
 }

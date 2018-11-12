@@ -5,10 +5,9 @@ import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.service.ActionDeviceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * @author HuaChen
@@ -31,5 +30,40 @@ public class ActionDeviceController {
     @RequestMapping("/controller")
     public ResponseData controller(@RequestBody InteractionData interactionData) {
         return actionDeviceService.controller(interactionData);
+    }
+
+    @PostMapping("adddevice")
+    public ResponseData addDevice(@RequestBody InteractionData interactionData, HttpSession httpSession) {
+        return actionDeviceService.addDevice(interactionData, httpSession);
+    }
+
+    @PostMapping("adddeviceinfo")
+    public ResponseData addDeviceInfo(@RequestBody InteractionData interactionData, HttpSession httpSession) {
+        return actionDeviceService.addDeviceInfo(interactionData, httpSession);
+    }
+
+    @PostMapping("querydeviceinfo")
+    public ResponseData queryDeviceInfo(@RequestBody InteractionData interactionData, HttpSession httpSession) {
+        return actionDeviceService.queryDeviceInfo(interactionData, httpSession);
+    }
+
+    @PostMapping("updatedeviceinfo")
+    public ResponseData updateDeviceInfo(@RequestBody InteractionData interactionData, HttpSession httpSession) {
+        return actionDeviceService.updateDeviceInfo(interactionData, httpSession);
+    }
+
+    @PostMapping("updatedevicename")
+    public ResponseData updateDeviceName(@RequestBody InteractionData interactionData, HttpSession httpSession) {
+        return actionDeviceService.updateDeviceName(interactionData, httpSession);
+    }
+
+    @PostMapping("deldevice")
+    public ResponseData delDevice(@RequestBody InteractionData interactionData, HttpSession httpSession) {
+        return actionDeviceService.delDevice(interactionData, httpSession);
+    }
+
+    @PostMapping("querydevicelog")
+    public ResponseData queryDeviceLog(@RequestBody InteractionData interactionData, HttpSession httpSession) {
+        return actionDeviceService.delDevice(interactionData, httpSession);
     }
 }
