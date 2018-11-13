@@ -18,5 +18,10 @@ public interface QueryDeviceService {
      */
     ResponseData listPowerSum(InteractionData interactionData);
 
+    /**
+     * 得到用户的所有端口以及权限
+     * @return 用户的所有端口以及权限
+     */
+    ResponseData queryIndexs(HttpSession httpSession);
 
 }

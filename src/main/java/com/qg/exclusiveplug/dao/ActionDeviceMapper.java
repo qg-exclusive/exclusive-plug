@@ -47,7 +47,7 @@ public interface ActionDeviceMapper {
      * @param userId 用户ID
      * @return 操作结果
      */
-    int delUserDeviceInfo(@Param("deviceIndex") int deviceIndex, @Param("userId") int userId);
+    int delUserDeviceInfo(@Param("userId") int userId, @Param("deviceIndex") int deviceIndex);
 
     /**
      * 根据UUID查询对应的设备端口以及权限
@@ -89,5 +89,5 @@ public interface ActionDeviceMapper {
      * @param deviceIndex 设备端口
      * @return 日志信息
      */
-    DeviceLog queryDeviceLog(@Param("deviceIndex") int deviceIndex);
+    List<DeviceLog> queryDeviceLog(@Param("deviceIndex") int deviceIndex);
 }

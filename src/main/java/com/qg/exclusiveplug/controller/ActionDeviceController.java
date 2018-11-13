@@ -63,7 +63,12 @@ public class ActionDeviceController {
     }
 
     @PostMapping("querydevicelog")
-    public ResponseData queryDeviceLog(@RequestBody InteractionData interactionData, HttpSession httpSession) {
-        return actionDeviceService.delDevice(interactionData, httpSession);
+    public ResponseData queryDeviceLog(@RequestBody InteractionData interactionData) {
+        return actionDeviceService.queryDeviceLog(interactionData);
+    }
+
+    @PostMapping("timing")
+    public ResponseData timing(@RequestBody InteractionData interactionData, HttpSession httpSession) {
+        return actionDeviceService.timing(interactionData, httpSession);
     }
 }

@@ -1,6 +1,6 @@
 package com.qg.exclusiveplug.config;
 
-import com.qg.exclusiveplug.handlers.WebSocketInterceptor;
+import com.qg.exclusiveplug.interceptor.WebSocketInterceptor;
 import com.qg.exclusiveplug.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.session.StandardSessionFacade;

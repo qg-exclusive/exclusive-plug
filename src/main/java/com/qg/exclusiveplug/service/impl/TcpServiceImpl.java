@@ -6,7 +6,6 @@ import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractBigData;
 import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.enums.DMUrlEnum;
 import com.qg.exclusiveplug.enums.DeviceStatusEnum;
 import com.qg.exclusiveplug.enums.SmsEnum;
 import com.qg.exclusiveplug.enums.StatusEnum;
@@ -17,12 +16,10 @@ import com.qg.exclusiveplug.map.WebSocketHolder;
 import com.qg.exclusiveplug.model.Device;
 import com.qg.exclusiveplug.service.TcpService;
 import com.qg.exclusiveplug.util.DateUtil;
-import com.qg.exclusiveplug.util.HttpClientUtil;
 import com.qg.exclusiveplug.util.SmsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -113,20 +110,22 @@ public class TcpServiceImpl implements TcpService {
         // 将设备信息放入交互类
         RequestData<Device> requestData = new RequestData<>();
         requestData.setData(device);
-        InteractBigData interactBigData = null;
+        InteractBigData interactBigData = new InteractBigData();
+        interactBigData.setStatus(1);
 
         // 与数据挖掘端交互
-        try {
+        //TODO 因测试取消
+        /*try {
             interactBigData = HttpClientUtil.demandedCount(DMUrlEnum.JUDGE_STATUS.getDMUrl(), requestData);
         } catch (IOException e) {
             log.debug("数据挖掘端连接失败");
             responseData.setStatus(StatusEnum.PREDICTED_FAILED.getStatus());
             e.printStackTrace();
-        }
+        }*/
 
-        if (null != interactBigData) {
+        /*if (null != interactBigData) {
             return interactBigData.getStatus();
-        }
+        }*/
 
         // 返回信息
         return 0;

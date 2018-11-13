@@ -25,7 +25,7 @@
           ${autoClose}
         )
     </insert>
-    <update id="updateUserDeviceInfo" parameterType="userDeviceInfo">
+    <update id="updateUserDeviceInfo" parameterType="UserDeviceInfo">
         UPDATE user_device
         SET user_privilege = ${userPrivilege}
         WHERE user_id = ${userId}
@@ -60,22 +60,22 @@
         WHERE user_id = ${userId}
         AND device_index = ${deviceIndex}
     </select>
-    <select id="queryDeviceUuidByUuid" resultType="deviceUuid">
+    <select id="queryDeviceUuidByUuid" resultType="DeviceUuid">
         SELECT device_index, device_privilege
         FROM device_uuid
         WHERE uuid = #{uuid}
     </select>
-    <select id="queryDeviceInfo" resultType="deviceInfo">
+    <select id="queryDeviceInfo" resultType="DeviceInfo">
         SELECT *
         FROM device_info
         WHERE device_index = ${deviceIndex}
     </select>
-    <select id="listUserDeviceIndex" resultType="userDeviceInfo">
+    <select id="listUserDeviceIndex" resultType="UserDeviceInfo">
         SELECT device_index, user_privilege
         FROM user_device
         WHERE user_id = ${userId}
     </select>
-    <select id="queryDeviceLog" resultType="deviceLog">
+    <select id="queryDeviceLog" resultType="DeviceLog">
         SELECT *
         FROM device_log
         WHERE device_index = ${deviceIndex}

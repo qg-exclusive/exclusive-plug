@@ -66,4 +66,12 @@ public interface ActionDeviceService {
      * @return 日志信息
      */
     ResponseData queryDeviceLog(InteractionData interactionData);
+
+    /**
+     * 定时任务
+     * @param interactionData 串口号，启动或关闭，时间
+     * @param httpSession 用户信息
+     * @return 操作结果
+     */
+    ResponseData timing(InteractionData interactionData, HttpSession httpSession);
 }

@@ -7,6 +7,7 @@ import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.StatusEnum;
 import com.qg.exclusiveplug.handlers.TcpHandler;
 import com.qg.exclusiveplug.map.LongWaitList;
+import com.qg.exclusiveplug.map.NettyChannelHolder;
 import com.qg.exclusiveplug.map.TimeMap;
 import com.qg.exclusiveplug.model.DeviceInfo;
 import com.qg.exclusiveplug.model.DeviceUuid;
@@ -14,13 +15,22 @@ import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.model.UserDeviceInfo;
 import com.qg.exclusiveplug.service.ActionDeviceService;
 import com.qg.exclusiveplug.util.DateUtil;
+import io.netty.channel.ChannelHandlerContext;
+import jdk.net.SocketFlow;
 import lombok.extern.slf4j.Slf4j;
+import org.quartz.JobDetail;
+import org.quartz.SimpleScheduleBuilder;
+import org.quartz.SimpleTrigger;
+import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.text.ParseException;
+import java.util.List;
 import java.util.Map;
+
+import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 
 @Service
 @Slf4j
@@ -69,32 +79,39 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
     @Override
     public ResponseData addDevice(InteractionData interactionData, HttpSession httpSession) {
         ResponseData responseData = new ResponseData();
-        int userId = ((User) httpSession.getAttribute("user")).getUserId();
+        User user = (User) httpSession.getAttribute("user");
+        int userId = user.getUserId();
         String uuid = interactionData.getUuid();
-        log.info("增加设备-->>用户ID:{},端口:{},uuid:{}", userId, uuid);
+        log.info("增加设备-->>用户ID:{},uuid:{}", userId, uuid);
 
         if (null != uuid) {
             // 取出出厂设置中该UUID对应的端口与权限
             DeviceUuid deviceUuid = actionDeviceMapper.queryDeviceUuidByUuid(uuid);
             int deviceIndex = deviceUuid.getDeviceIndex();
             if (0 != deviceIndex) {
-                int userPrivilege = deviceUuid.getPrivilege();
-                log.info("增加设备-->>{}对应的端口:{}，权限:{}", uuid, deviceIndex, userPrivilege);
+                int devicePrivilege = deviceUuid.getDevicePrivilege();
+                log.info("增加设备-->>{}对应的端口:{}，权限:{}", uuid, deviceIndex, devicePrivilege);
 
                 // 得到用户关联设备信息
                 UserDeviceInfo userDeviceInfo = actionDeviceMapper.queryUserDeviceInfo(userId, deviceIndex);
 
+                Map<Integer, Integer> integerIntegerMap = user.getIndexPrivilegeMap();
                 // 用户是否已跟该用电器关联
                 if (null == userDeviceInfo) {
-                    actionDeviceMapper.addUserDeviceInfo(new UserDeviceInfo(userId, deviceIndex, userPrivilege));
+                    actionDeviceMapper.addUserDeviceInfo(new UserDeviceInfo(userId, deviceIndex, devicePrivilege));
+                    integerIntegerMap.put(deviceIndex, devicePrivilege);
                 } else {
                     // 更改权限
-                    userDeviceInfo.setUserPrivilege(userPrivilege);
-                    actionDeviceMapper.updateUserDeviceInfo(userDeviceInfo);
+                    log.info("增加设备-->> 更改权限");
+                    userDeviceInfo.setUserPrivilege(devicePrivilege);
+                    actionDeviceMapper.updateUserDeviceInfo(new UserDeviceInfo(userId, deviceIndex, devicePrivilege));
+                    integerIntegerMap.replace(deviceIndex, devicePrivilege);
                 }
-
+                Data data = new Data();
+                data.setUser(User.builder().indexPrivilegeMap(integerIntegerMap).build());
+                responseData.setData(data);
                 responseData.setStatus(StatusEnum.NORMAL.getStatus());
-                log.info("增加设备-->>响应成功");
+
             } else {
                 responseData.setStatus(StatusEnum.DEVICE_ISNOEXIST.getStatus());
                 log.info("增加设备-->>设备不存在");
@@ -103,7 +120,9 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
             responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
             log.info("增加设备-->>前端参数错误");
         }
+        log.info("增加设备-->>响应成功");
         return responseData;
+
     }
 
     /**
@@ -211,11 +230,16 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
      */
     @Override
     public ResponseData updateDeviceName(InteractionData interactionData, HttpSession httpSession) {
+        ResponseData responseData = new ResponseData();
+        int deviceIndex = interactionData.getIndex();
         String machineName = interactionData.getMachineName();
         if (null != machineName && !machineName.equals("")) {
-            //TODO 修改端口名称
+            String message = "*" + deviceIndex + "-" + machineName + "$";
+            log.info("修改端口名称" + message);
+            new TcpHandler().send(deviceIndex, message);
         }
-        return new ResponseData();
+        responseData.setStatus(StatusEnum.NORMAL.getStatus());
+        return responseData;
     }
 
     /**
@@ -230,12 +254,13 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
         ResponseData responseData = new ResponseData();
         User user = (User) httpSession.getAttribute("user");
         int deviceIndex = interactionData.getIndex();
+        int userId = user.getUserId();
 
-        log.info("删除设备-->>用户ID：{}，设备端口：{}", user.getUserId(), deviceIndex);
+        log.info("删除设备-->>用户ID：{}，设备端口：{}", userId, deviceIndex);
 
         // 将指定端口移除
         Map<Integer, Integer> indexPrivilegeMap = user.getIndexPrivilegeMap();
-        actionDeviceMapper.delUserDeviceInfo(user.getUserId(), deviceIndex);
+        actionDeviceMapper.delUserDeviceInfo(userId, deviceIndex);
         indexPrivilegeMap.remove(deviceIndex);
 
         user.setIndexPrivilegeMap(indexPrivilegeMap);
@@ -261,11 +286,23 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
 
         ResponseData responseData = new ResponseData();
         Data data = new Data();
-        data.setDeviceLog(actionDeviceMapper.queryDeviceLog(interactionData.getIndex()));
+        data.setDeviceLogList(actionDeviceMapper.queryDeviceLog(interactionData.getIndex()));
 
         responseData.setData(data);
         responseData.setStatus(StatusEnum.NORMAL.getStatus());
         return responseData;
+    }
+
+    /**
+     * 定时任务
+     *
+     * @param interactionData 串口号，启动或关闭，时间
+     * @param httpSession     用户信息
+     * @return 操作结果
+     */
+    @Override
+    public ResponseData timing(InteractionData interactionData, HttpSession httpSession) {
+        return null;
     }
 
 }

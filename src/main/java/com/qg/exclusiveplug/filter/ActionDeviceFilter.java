@@ -1,4 +1,4 @@
-package com.qg.exclusiveplug.interceptor;
+package com.qg.exclusiveplug.filter;
 
 import com.google.gson.Gson;
 import com.qg.exclusiveplug.dtos.InteractionData;
@@ -29,12 +29,14 @@ public class ActionDeviceFilter implements Filter {
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
-        int index = new Gson().fromJson(httpServletRequest.getReader(), InteractionData.class).getIndex();
-        User user = (User) httpServletRequest.getSession().getAttribute("user");
 
+        // 封装请求参数
+        myRequestWrapper = new BodyReaderHttpServletRequestWrapper(httpServletRequest);
+        int index = new Gson().fromJson(myRequestWrapper.getReader(), InteractionData.class).getIndex();
+        User user = (User) myRequestWrapper.getSession().getAttribute("user");
 
         ResponseData responseData = new ResponseData();
-        String url = httpServletRequest.getRequestURI();
+        String url = myRequestWrapper.getRequestURI();
         log.info("用户正在访问-->{}", url);
 
 //        User user = (User) httpServletRequest.getSession().getAttribute("user");
@@ -43,11 +45,11 @@ public class ActionDeviceFilter implements Filter {
         if (null != user) {
             Map<Integer, Integer> indexPrivilegeMap = user.getIndexPrivilegeMap();
             if (indexPrivilegeMap.containsKey(index) && indexPrivilegeMap.get(index) == 1) {
-                filterChain.doFilter(httpServletRequest, servletResponse);
+                filterChain.doFilter(myRequestWrapper, servletResponse);
                 return;
             } else {
-                if (url.indexOf("/adddevice") > 0) {
-                    filterChain.doFilter(httpServletRequest, servletResponse);
+                if (url.equals("/actiondevice/adddevice")) {
+                    filterChain.doFilter(myRequestWrapper, servletResponse);
                     return;
 
                 } else {

@@ -1,5 +1,6 @@
-package com.qg.exclusiveplug.handlers;
+package com.qg.exclusiveplug.interceptor;
 
+import com.qg.exclusiveplug.listener.MySessionContext;
 import com.qg.exclusiveplug.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
@@ -27,16 +28,25 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
         log.info("webSocket握手请求...");
         if (serverHttpRequest instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) serverHttpRequest;
-            HttpSession httpSession = servletRequest.getServletRequest().getSession(false);
-            if (httpSession != null) {
-                //使用userName区分WebSocketHandler，以便定向发送消息
-                User user = (User) httpSession.getAttribute("user");
-                map.put(String.valueOf(serverHttpRequest.getRemoteAddress()), user);
-            }else{
-                log.debug("httpsession is null");
+            String jSessionId = servletRequest.getServletRequest().getParameter("jSessionId");
+            if (null != jSessionId && !jSessionId.equals("")) {
+                MySessionContext myc = MySessionContext.getInstance();
+                if (null != myc) {
+                    HttpSession httpSession = myc.getSession(jSessionId);
+                    if (null != httpSession) {
+                        User user = (User) httpSession.getAttribute("user");
+                        if (null != user) {
+                            log.info("user用户：" + user);
+
+                            map.put(serverHttpRequest.getRemoteAddress().toString(), user);
+                            return true;
+                        }
+                    }
+                }
             }
+
         }
-        return true;
+        return false;
     }
 
     @Override

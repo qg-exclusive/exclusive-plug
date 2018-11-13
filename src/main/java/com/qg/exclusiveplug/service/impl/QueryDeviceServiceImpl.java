@@ -6,12 +6,14 @@ import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.enums.StatusEnum;
 import com.qg.exclusiveplug.model.PowerSum;
+import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.service.QueryDeviceService;
 import com.qg.exclusiveplug.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpSession;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -59,6 +61,22 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
         Data data = new Data();
         data.setPowerSumList(powerSumList);
         responseData.setData(data);
+        return responseData;
+    }
+
+    /**
+     * 得到用户的所有端口以及权限
+     *
+     * @return 用户的所有端口以及权限
+     */
+    @Override
+    public ResponseData queryIndexs(HttpSession httpSession) {
+        ResponseData responseData = new ResponseData();
+        User user = (User) httpSession.getAttribute("user");
+        Data data = new Data();
+        data.setUser(User.builder().indexPrivilegeMap(user.getIndexPrivilegeMap()).build());
+        responseData.setData(data);
+        responseData.setStatus(StatusEnum.NORMAL.getStatus());
         return responseData;
     }
 

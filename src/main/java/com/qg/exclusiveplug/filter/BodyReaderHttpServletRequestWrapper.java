@@ -1,4 +1,4 @@
-package com.qg.exclusiveplug.interceptor;
+package com.qg.exclusiveplug.filter;
 
 import javax.servlet.ReadListener;
 import javax.servlet.ServletInputStream;

@@ -116,6 +116,7 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
         if (evt instanceof IdleStateEvent) {
             log.info("检查通道连接状态 >> {}", ctx.channel().remoteAddress());
             loss_connect_time++;
+            System.out.println(loss_connect_time);
             if(loss_connect_time > 2){
                 log.info("关闭不活动的连接 >> {}", ctx.channel().remoteAddress());
                 NettyChannelHolder.removeChannel(ctx);

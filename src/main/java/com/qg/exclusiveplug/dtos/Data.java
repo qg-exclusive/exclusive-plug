@@ -57,6 +57,6 @@ public class Data {
     /**
      * 设备被操作日志
      */
-    DeviceLog deviceLog;
+    List<DeviceLog> deviceLogList;
 
 }

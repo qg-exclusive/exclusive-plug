@@ -26,5 +26,5 @@ public class DeviceUuid {
     /**
      * 设备的权限
      */
-    private int privilege;
+    private int devicePrivilege;
 }

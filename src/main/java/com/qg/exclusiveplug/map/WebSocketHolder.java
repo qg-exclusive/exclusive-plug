@@ -38,4 +38,5 @@ public class WebSocketHolder {
         map.entrySet().stream().filter(entry -> entry.getValue() == webSocketSessionList)
                 .forEach(entry -> map.remove(entry.getKey()));
     }
+
 }

@@ -10,7 +10,6 @@ import org.springframework.web.socket.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -42,6 +41,9 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
         log.info("切换串口：" + deviceIndex);
 
+        //去掉当前指向端口
+        removeWebSocketSession(integerIntegermap, webSocketSession);
+
         // 判断权限
         if(integerIntegermap.containsKey(deviceIndex)) {
             if(WebSocketHolder.containsKey(deviceIndex)) {
@@ -70,16 +72,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
         Map<Integer, Integer> integerIntegermap = ((User) webSocketSession.getAttributes()
                 .get(String.valueOf(webSocketSession.getRemoteAddress()))).getIndexPrivilegeMap();
 
-        Iterator<Integer> integerIterator = integerIntegermap.keySet().iterator();
-        while(integerIterator.hasNext()) {
-            List<WebSocketSession> webSocketSessionList = WebSocketHolder.getWebsocketSessionList(integerIterator.next());
-            for (WebSocketSession webSocketSession1 : webSocketSessionList) {
-                if (webSocketSession1 == webSocketSession) {
-                    webSocketSessionList.remove(webSocketSession1);
-                }
-            }
-        }
 
+        removeWebSocketSession(integerIntegermap, webSocketSession);
         log.info("Socket会话结束，即将移除socket");
     }
 
@@ -101,6 +95,31 @@ public class MyWebSocketHandler implements WebSocketHandler {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    /**
+     * 去除连接
+     * @param integerIntegermap 端口权限集合
+     * @param webSocketSession 连接
+     */
+    private void removeWebSocketSession(Map<Integer, Integer> integerIntegermap, WebSocketSession webSocketSession){
+        Integer deviceIndex = null;
+        WebSocketSession save = null;
+        for (Integer integer : integerIntegermap.keySet()) {
+            List<WebSocketSession> webSocketSessionList = WebSocketHolder.getWebsocketSessionList(integer);
+            if (null != webSocketSessionList && webSocketSessionList.size() > 0) {
+                for (WebSocketSession webSocketSession1 : webSocketSessionList) {
+                    if (webSocketSession1 == webSocketSession) {
+                        save = webSocketSession1;
+                        deviceIndex = integer;
+
+                    }
+                }
+            }
+        }
+        if (null != deviceIndex) {
+            WebSocketHolder.getWebsocketSessionList(deviceIndex).remove(save);
         }
     }
 }
