@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.qg.exclusiveplug.dao.ActionDeviceMapper">
+
+    <insert id="addUserDeviceInfo" parameterType="userDeviceInfo">
+        INSERT INTO user_device
+        (user_id, device_index, user_privilege)
+        VALUES
+        (
+          ${userId},
+          ${deviceIndex},
+          ${userPrivilege}
+        )
+    </insert>
+    <insert id="addDeviceInfo" parameterType="deviceInfo">
+        INSERT INTO device_info
+        (device_index, device_work_power, device_standby_power, auto_close)
+        VALUES
+        (
+          ${deviceIndex},
+          ${deviceWorkPower},
+          ${deviceStandbyPower},
+          ${autoClose}
+        )
+    </insert>
+    <update id="updateUserDeviceInfo" parameterType="userDeviceInfo">
+        UPDATE user_device
+        SET user_privilege = ${userPrivilege}
+        WHERE user_id = ${userId}
+        AND device_index = ${deviceIndex}
+    </update>
+    <update id="updateDeviceInfo" parameterType="deviceInfo">
+        UPDATE device_info SET
+        device_index = ${deviceIndex}
+        <if test="null != deviceWorkPower">
+            , device_work_power = ${deviceWorkPower}
+        </if>
+        <if test="null != deviceStandbyPower">
+            , device_standby_power = ${deviceStandbyPower}
+        </if>
+        <if test="null != autoClose">
+            , auto_close = ${autoClose}
+        </if>
+        WHERE device_index = ${deviceIndex}
+    </update>
+    <delete id="delUserDeviceInfo">
+        DELETE FROM user_device
+        WHERE user_id = ${userId}
+        AND device_index = ${deviceIndex}
+    </delete>
+    <delete id="delDeviceInfo">
+        DELETE FROM device_info
+        WHERE device_index = ${deviceIndex}
+    </delete>
+    <select id="queryUserDeviceInfo" resultType="UserDeviceInfo">
+        SELECT device_index, user_privilege
+        FROM user_device
+        WHERE user_id = ${userId}
+        AND device_index = ${deviceIndex}
+    </select>
+    <select id="queryDeviceUuidByUuid" resultType="deviceUuid">
+        SELECT device_index, device_privilege
+        FROM device_uuid
+        WHERE uuid = #{uuid}
+    </select>
+    <select id="queryDeviceInfo" resultType="deviceInfo">
+        SELECT *
+        FROM device_info
+        WHERE device_index = ${deviceIndex}
+    </select>
+    <select id="listUserDeviceIndex" resultType="userDeviceInfo">
+        SELECT device_index, user_privilege
+        FROM user_device
+        WHERE user_id = ${userId}
+    </select>
+    <select id="queryDeviceLog" resultType="deviceLog">
+        SELECT *
+        FROM device_log
+        WHERE device_index = ${deviceIndex}
+    </select>
+
+</mapper>
