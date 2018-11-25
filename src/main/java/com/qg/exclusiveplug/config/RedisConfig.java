@@ -48,17 +48,37 @@ public class RedisConfig extends CachingConfigurerSupport {
     @Bean
     <T> RedisTemplate<String, T> redisTemplate(RedisConnectionFactory factory) {
         RedisTemplate<String, T> redisTemplate = new RedisTemplate<>();
+        System.out.println("加载redis配置");
 
-        Jackson2JsonRedisSerializer<T> j = new Jackson2JsonRedisSerializer(Object.class);
+        Jackson2JsonRedisSerializer j = new Jackson2JsonRedisSerializer(Object.class);
         // value值得序列化采用fastJsonRedisSerializer
         redisTemplate.setValueSerializer(j);
         redisTemplate.setHashValueSerializer(j);
         // key的序列化采用StringRedisSerializer
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());
-
         redisTemplate.setConnectionFactory(factory);
+        redisTemplate.setEnableTransactionSupport(true);
         return redisTemplate;
     }
 
+    /**
+     * 设置spring session redis 序列化方式
+     * @param factory
+     * @return
+     */
+    /*@Bean
+    public SessionRepository sessionRepository(RedisConnectionFactory factory){
+        RedisTemplate<Object, Object> redisTemplate = new RedisTemplate<>();
+        Jackson2JsonRedisSerializer j = new Jackson2JsonRedisSerializer(Object.class);
+        redisTemplate.setValueSerializer(j);
+        redisTemplate.setHashValueSerializer(j);
+        redisTemplate.setConnectionFactory(factory);
+        RedisOperationsSessionRepository sessionRepository =  new RedisOperationsSessionRepository(redisTemplate);
+
+        FastJsonRedisSerializer<Object> fastJsonRedisSerializer = new FastJsonRedisSerializer<>(Object.class);
+        sessionRepository.setDefaultSerializer(fastJsonRedisSerializer);
+        sessionRepository.setDefaultMaxInactiveInterval(36000);
+        return sessionRepository;
+    }*/
 }

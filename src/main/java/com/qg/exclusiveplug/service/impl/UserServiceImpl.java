@@ -6,9 +6,9 @@ import com.qg.exclusiveplug.dao.UserMapper;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.enums.SmsEnum;
-import com.qg.exclusiveplug.enums.StatusEnum;
-import com.qg.exclusiveplug.enums.UserEnum;
+import com.qg.exclusiveplug.constant.SmsEnum;
+import com.qg.exclusiveplug.constant.StatusEnum;
+import com.qg.exclusiveplug.constant.UserEnum;
 import com.qg.exclusiveplug.map.HttpSessionHandler;
 import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.model.UserDeviceInfo;
@@ -18,12 +18,15 @@ import com.qg.exclusiveplug.util.FormatMatchingUtil;
 import com.qg.exclusiveplug.util.SmsUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author HuaChen
@@ -34,20 +37,14 @@ import java.util.Map;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    /**
-     * 存储用户检验码
-     */
-    Map<String, String> checkCodeMap = new HashMap<>();
-
-    {
-        checkCodeMap.put("15521187408", "LOGIN:8843:" + System.currentTimeMillis());
-    }
-
     @Autowired
     private UserMapper userMapper;
 
     @Autowired
     private ActionDeviceMapper actionDeviceMapper;
+
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     /**
      * 增加新的用户
@@ -71,7 +68,8 @@ public class UserServiceImpl implements UserService {
 
             // 用户未注册
             if (null == user) {
-                String code = checkCodeMap.get(userPhone);
+                String code = redisTemplate.opsForValue().get(userPhone);
+//                String code = checkCodeMap.get(userPhone);
                 log.info("前端验证码-->{},后台验证码-->{}", checkCode, code);
 
                 // 存在验证码
@@ -79,8 +77,7 @@ public class UserServiceImpl implements UserService {
                     String[] spilt = code.split(":");
 
                     // 验证码未过时且符合条件
-                    if (spilt[0].equals(UserEnum.REGISTER.getStatus()) && spilt[1].equals(checkCode)
-                            && (System.currentTimeMillis() - Long.parseLong(spilt[2])) / (60 * 1000) < 5) {
+                    if (spilt[0].equals(UserEnum.REGISTER.getStatus()) && spilt[1].equals(checkCode)) {
 
                         // DM5加密
                         interactionData.getUser().setUserPassword(DigestUtil.digestPassword(userPassword));
@@ -90,7 +87,8 @@ public class UserServiceImpl implements UserService {
                     } else {
                         responseData.setStatus(StatusEnum.USER_CHECKCODEERROR.getStatus());
                     }
-                    checkCodeMap.remove(userPhone);
+                    redisTemplate.delete(userPhone);
+//                    checkCodeMap.remove(userPhone);
                 } else {
                     log.info("验证码参数错误");
                     responseData.setStatus(StatusEnum.RUN_ERROR.getStatus());
@@ -120,7 +118,7 @@ public class UserServiceImpl implements UserService {
         log.info("验证码形式-->{}, 用户手机号-->{}", key, userPhone);
 
         if (null != userPhone && FormatMatchingUtil.isPhoneLegal(userPhone)) {
-            String checkCode = String.valueOf((int) (Math.random() * 10000));
+            String checkCode = produceCode(4);
 
             User user = userMapper.getUserByPhone(userPhone);
             switch (key) {
@@ -142,6 +140,7 @@ public class UserServiceImpl implements UserService {
                     }
                     break;
                 }
+                // 不存在情况
                 default: {
                     responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
                     break;
@@ -203,7 +202,8 @@ public class UserServiceImpl implements UserService {
             User user = userMapper.getUserByPhone(userPhone);
 
             if (null != user) {
-                String code = checkCodeMap.get(userPhone);
+                String code = redisTemplate.opsForValue().get(userPhone);
+//                String code = checkCodeMap.get(userPhone);
 
                 // 存在验证码
                 if (null != checkCode && !checkCode.equals("") && FormatMatchingUtil.isCheckCode(checkCode)
@@ -211,8 +211,7 @@ public class UserServiceImpl implements UserService {
                     String[] spilt = code.split(":");
 
                     // 验证码未过时且符合条件
-                    if (spilt[0].equals(UserEnum.LOGIN.getStatus()) && spilt[1].equals(checkCode)
-                            && (System.currentTimeMillis() - Long.parseLong(spilt[2])) / (60 * 1000) < 5) {
+                    if (spilt[0].equals(UserEnum.LOGIN.getStatus()) && spilt[1].equals(checkCode)) {
 
                         responseData = doLogin(user, httpSession);
                     } else {
@@ -244,7 +243,9 @@ public class UserServiceImpl implements UserService {
         ResponseData responseData = new ResponseData();
 
         // 存储验证码
-        checkCodeMap.put(userPhone, key + ":" + checkCode + ":" + System.currentTimeMillis());
+        redisTemplate.opsForValue().set(userPhone, key + ":" + checkCode);
+        redisTemplate.expire(userPhone, 5, TimeUnit.MINUTES);
+//        checkCodeMap.put(userPhone, key + ":" + checkCode + ":" + System.currentTimeMillis());
         log.info("验证码-->{}", checkCode);
         try {
             SmsUtil.sendSms(userPhone, SmsEnum.USER_ACTION.getTemplateCode(),
@@ -281,5 +282,14 @@ public class UserServiceImpl implements UserService {
         responseData.setData(data);
 
         return responseData;
+    }
+
+    private String produceCode(int length) {
+        StringBuilder stringBuilder = new StringBuilder();
+        Random random = new Random();
+        for (int i = 0; i < length; i++) {
+            stringBuilder.append(random.nextInt(10));
+        }
+        return String.valueOf(stringBuilder);
     }
 }

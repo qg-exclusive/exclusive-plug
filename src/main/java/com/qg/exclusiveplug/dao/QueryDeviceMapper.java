@@ -21,7 +21,7 @@ public interface QueryDeviceMapper {
      * @param devices 设备集合
      * @return 插入结果
      */
-    int saveDevices(List<Device> devices);
+    int saveDevices(@Param("devices") List<Device> devices,@Param("tableName")String tableName) throws Exception;
 
     /**
      * 取得某串口某时间段内的总用电量
@@ -31,5 +31,5 @@ public interface QueryDeviceMapper {
      * @param endTime   结束时间
      * @return 某串口某时间段内的总用电量
      */
-    Double listPowerSum(@Param("index") int index, @Param("startTime") String startTime, @Param("endTime") String endTime);
+    Double listPowerSum(@Param("index") int index, @Param("startTime") String startTime, @Param("endTime") String endTime,@Param("tableName")String tableName);
 }

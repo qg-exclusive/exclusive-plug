@@ -125,4 +125,8 @@ public class FormatMatchingUtil {
         Matcher m = p.matcher(str);
         return m.matches();
     }
+    @SuppressWarnings("unchecked")
+    public static <T> T cast(Object object) {
+        return (T)object;
+    }
 }

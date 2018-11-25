@@ -4,7 +4,7 @@ import com.qg.exclusiveplug.dao.QueryDeviceMapper;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.enums.StatusEnum;
+import com.qg.exclusiveplug.constant.StatusEnum;
 import com.qg.exclusiveplug.model.PowerSum;
 import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.service.QueryDeviceService;
@@ -97,11 +97,13 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
             for (int i = 0; i < 24; i++) {
                 // 得到起始时间和截至时间的总用电量
                 String startTime = sdf.format(calendar.getTime());
+                String tableName = "device" + new SimpleDateFormat("yyyyMMdd").format(calendar.getTime());
                 calendar.add(Calendar.HOUR_OF_DAY, 1);
                 String endTime = sdf.format(calendar.getTime().getTime());
+                // TODO BUG 关于表不存在以及跨表查询问题
                 // 切割小时单位
                 PowerSum powerSum = new PowerSum(startTime.split(" ")[1].split(":")[0],
-                        queryDeviceMapper.listPowerSum(index, startTime, endTime));
+                        queryDeviceMapper.listPowerSum(index, startTime, endTime, tableName));
                 log.info("开始时间：" + startTime + "结束时间：" + endTime);
                 powerSumList.add(powerSum);
             }
@@ -130,8 +132,9 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
                 calendar.add(Calendar.DAY_OF_WEEK, 1);
                 String endTime = sdf.format(calendar.getTime().getTime());
                 // 以天为单位
-                PowerSum powerSum = new PowerSum(startTime.split(" ")[0],
-                        queryDeviceMapper.listPowerSum(index, startTime, endTime));
+                String tableName = "device" + time.replaceAll("-", "");
+                PowerSum powerSum = new PowerSum(startTime.split(" ")[1].split(":")[0],
+                        queryDeviceMapper.listPowerSum(index, startTime, endTime, tableName));
                 log.info("开始时间：" + startTime + "结束时间：" + endTime);
                 powerSumList.add(powerSum);
             }
@@ -160,8 +163,9 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
                 calendar.add(Calendar.DAY_OF_YEAR, 1);
                 String endTime = sdf.format(calendar.getTime().getTime());
                 // 以天为单位
-                PowerSum powerSum = new PowerSum(startTime.split(" ")[0],
-                        queryDeviceMapper.listPowerSum(index, startTime, endTime));
+                String tableName = "device" + time.replaceAll("-", "");
+                PowerSum powerSum = new PowerSum(startTime.split(" ")[1].split(":")[0],
+                        queryDeviceMapper.listPowerSum(index, startTime, endTime, tableName));
                 log.info("开始时间：" + startTime + "结束时间：" + endTime);
                 powerSumList.add(powerSum);
             }
@@ -170,7 +174,6 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
         }
         return powerSumList;
     }
-
 
 
 }

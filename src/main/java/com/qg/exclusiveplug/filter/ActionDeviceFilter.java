@@ -1,9 +1,9 @@
 package com.qg.exclusiveplug.filter;
 
 import com.google.gson.Gson;
+import com.qg.exclusiveplug.constant.StatusEnum;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.enums.StatusEnum;
 import com.qg.exclusiveplug.model.User;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,7 +25,7 @@ public class ActionDeviceFilter implements Filter {
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         log.info("用户操作过滤器");
-        BodyReaderHttpServletRequestWrapper myRequestWrapper = null;
+        BodyReaderHttpServletRequestWrapper myRequestWrapper;
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
@@ -53,7 +53,7 @@ public class ActionDeviceFilter implements Filter {
                     return;
 
                 } else {
-                    log.info("操作用电器拦截器 -->> 用户无权限");
+                    log.info("操作用电器过滤器 -->> 用户无权限");
                     responseData.setStatus(StatusEnum.USER_HASNOPRIVILEGE.getStatus());
                 }
             }

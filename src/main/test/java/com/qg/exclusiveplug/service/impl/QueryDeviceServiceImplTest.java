@@ -36,7 +36,9 @@ public class QueryDeviceServiceImplTest {
                     String endTime = sdf.format(calendar.getTime());
                     calendar.add(Calendar.MINUTE, 30);
                     String startTime = sdf.format(calendar.getTime());
-                    System.out.print(queryDeviceMapper.listPowerSum(index,endTime, startTime) + " ");
+                    String tableName="device"+time.replaceAll("-","");
+
+                    System.out.print(queryDeviceMapper.listPowerSum(index,endTime, startTime, tableName) + " ");
                 }
                 System.out.println(" ");
             }

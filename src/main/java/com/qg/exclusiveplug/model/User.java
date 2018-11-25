@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -18,7 +19,7 @@ import java.util.Map;
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Builder
-public class User {
+public class User implements Serializable {
     /**
      * 用户ID
      */

@@ -104,24 +104,18 @@ public class DateUtil {
                 "((0?[1-9])|(1[0-9])|(2[0-8]))))))";
         Pattern pat = Pattern.compile(rexp);
         Matcher mat = pat.matcher(date);
-        boolean dateType = mat.matches();
-        return dateType;
+        return mat.matches();
     }
 
+    /**
+     * 判断是否符合yyyy-MM-dd HH:mm:ss
+     * @param patternString 时间
+     * @return 结果
+     */
     public static boolean isTimeLegal(String patternString) {
 
-        Pattern a = Pattern.compile("^((\\d{2}(([02468][048])|([13579][26]))[\\-\\/\\s]?" +
-                "((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?" +
-                "((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?" +
-                "((0?[1-9])|([1-2][0-9])))))|(\\d{2}(([02468][1235679])|([13579][01345789]))[\\-\\/\\s]?" +
-                "((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?" +
-                "((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|(1[0-9])|(2[0-8]))))))" +
-                "(\\s((([0-1][0-9])|(2?[0-3]))\\:([0-5]?[0-9])((\\s)|(\\:([0-5]?[0-9])))))?$");
+        Pattern a = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}");
         Matcher b = a.matcher(patternString);
-        if (b.matches()) {
-            return true;
-        } else {
-            return false;
-        }
+        return b.matches();
     }
 }

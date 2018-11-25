@@ -4,10 +4,9 @@ import com.qg.exclusiveplug.dao.ActionDeviceMapper;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.enums.StatusEnum;
+import com.qg.exclusiveplug.constant.StatusEnum;
 import com.qg.exclusiveplug.handlers.TcpHandler;
 import com.qg.exclusiveplug.map.LongWaitList;
-import com.qg.exclusiveplug.map.NettyChannelHolder;
 import com.qg.exclusiveplug.map.TimeMap;
 import com.qg.exclusiveplug.model.DeviceInfo;
 import com.qg.exclusiveplug.model.DeviceUuid;
@@ -15,22 +14,14 @@ import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.model.UserDeviceInfo;
 import com.qg.exclusiveplug.service.ActionDeviceService;
 import com.qg.exclusiveplug.util.DateUtil;
-import io.netty.channel.ChannelHandlerContext;
-import jdk.net.SocketFlow;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.JobDetail;
-import org.quartz.SimpleScheduleBuilder;
-import org.quartz.SimpleTrigger;
-import org.quartz.TriggerBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.text.ParseException;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
-import static org.quartz.SimpleScheduleBuilder.simpleSchedule;
 
 @Service
 @Slf4j
@@ -107,6 +98,10 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
                     actionDeviceMapper.updateUserDeviceInfo(new UserDeviceInfo(userId, deviceIndex, devicePrivilege));
                     integerIntegerMap.replace(deviceIndex, devicePrivilege);
                 }
+                // 替换权限
+                user.setIndexPrivilegeMap(integerIntegerMap);
+                httpSession.setAttribute("user", user);
+
                 Data data = new Data();
                 data.setUser(User.builder().indexPrivilegeMap(integerIntegerMap).build());
                 responseData.setData(data);
@@ -302,8 +297,60 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
      */
     @Override
     public ResponseData timing(InteractionData interactionData, HttpSession httpSession) {
-        return null;
-    }
+        ResponseData responseData = new ResponseData();
+        final String PATTERN = "yyyy-MM-dd HH:mm:ss";
 
+        int key = interactionData.getKey();
+        int index = interactionData.getIndex();
+        String time = interactionData.getTime();
+
+        log.info("定时任务-->> 关键词：{}， 端口：{}， 时间：{}",key, index, time);
+        if(DateUtil.isDate(time)) {
+            Calendar timingCal = Calendar.getInstance();
+
+            // get timingTask's Cal
+            try {
+                Date timingDate = Objects.requireNonNull(DateUtil.stringToDate(time, PATTERN));
+                timingCal.setTime(timingDate);
+            } catch (NullPointerException e) {
+                responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
+            }
+
+            // get currentTime's Cal
+            Calendar currentCal = Calendar.getInstance();
+            try {
+                currentCal.setTime(DateUtil.getCurrentDate());
+            } catch (ParseException e) {
+                responseData.setStatus(StatusEnum.RUN_ERROR.getStatus());
+
+            }
+
+            // judge timingCal is after than currentCal or not
+            if (timingCal.after(currentCal)) {
+                long diffSecond = DateUtil.diffSecond(currentCal.getTime(), timingCal.getTime());
+
+                log.info("定时任务-->> 距离{}秒执行", diffSecond);
+                try {
+                    Thread.sleep(diffSecond * 1000);
+                } catch (InterruptedException e) {
+                    responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
+                    e.printStackTrace();
+                    return responseData;
+                }
+
+                String message = "#" + index + "-" + key + "$";
+                log.info("定时任务" + message);
+                new TcpHandler().send(index, message);
+
+                responseData.setStatus(StatusEnum.NORMAL.getStatus());
+            } else {
+                responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
+            }
+        }else {
+            log.info("定时任务-->> 参数错误");
+            responseData.setStatus(StatusEnum.PARAMETER_ERROR.getStatus());
+        }
+        return responseData;
+    }
 }
 

@@ -1,4 +1,4 @@
-package com.qg.exclusiveplug.enums;
+package com.qg.exclusiveplug.constant;
 
 public enum DeviceStatusEnum {
 

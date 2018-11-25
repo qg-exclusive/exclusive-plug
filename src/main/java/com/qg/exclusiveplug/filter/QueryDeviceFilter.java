@@ -1,9 +1,9 @@
 package com.qg.exclusiveplug.filter;
 
 import com.google.gson.Gson;
+import com.qg.exclusiveplug.constant.StatusEnum;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.enums.StatusEnum;
 import com.qg.exclusiveplug.model.User;
 import lombok.extern.slf4j.Slf4j;
 
@@ -46,7 +46,7 @@ public class QueryDeviceFilter implements Filter {
                 filterChain.doFilter(myRequestWrapper, servletResponse);
                 return;
             } else {
-                log.info("用户权限不足");
+                log.info("用户权限不足,权限值为:{}", indexPrivilegeMap.values());
                 responseData.setStatus(StatusEnum.USER_HASNOPRIVILEGE.getStatus());
             }
         } else {

@@ -5,8 +5,8 @@ import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractBigData;
 import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.enums.DMUrlEnum;
-import com.qg.exclusiveplug.enums.StatusEnum;
+import com.qg.exclusiveplug.constant.DMUrlEnum;
+import com.qg.exclusiveplug.constant.StatusEnum;
 import com.qg.exclusiveplug.model.PowerSum;
 import com.qg.exclusiveplug.service.PredictService;
 import com.qg.exclusiveplug.util.DateUtil;
@@ -56,7 +56,9 @@ public class PredictServiceImpl implements PredictService {
                 String endTime = sdf.format(calendar.getTime());
                 calendar.add(Calendar.DAY_OF_MONTH, -1);
                 String startTime = sdf.format(calendar.getTime().getTime());
-                doubles[6 - i] = queryDeviceMapper.listPowerSum(index, startTime, endTime);
+                //add table name...
+                String tableName = "device" + time.replaceAll("-", "");
+                doubles[6 - i] = queryDeviceMapper.listPowerSum(index, startTime, endTime, tableName);
                 // 判空，防止无数据的情况发生
                 if (null == doubles[6 - i]) {
                     doubles[6 - i] = 0.0;

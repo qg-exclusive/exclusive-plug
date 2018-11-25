@@ -1,14 +1,14 @@
 package com.qg.exclusiveplug.service.impl;
 
 import com.aliyuncs.exceptions.ClientException;
-import com.qg.exclusiveplug.cache.CacheMap;
+import com.qg.exclusiveplug.constant.DMUrlEnum;
+import com.qg.exclusiveplug.constant.DeviceStatusEnum;
+import com.qg.exclusiveplug.constant.SmsEnum;
+import com.qg.exclusiveplug.constant.StatusEnum;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractBigData;
 import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.enums.DeviceStatusEnum;
-import com.qg.exclusiveplug.enums.SmsEnum;
-import com.qg.exclusiveplug.enums.StatusEnum;
 import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
 import com.qg.exclusiveplug.map.LongWaitList;
 import com.qg.exclusiveplug.map.TimeMap;
@@ -16,12 +16,15 @@ import com.qg.exclusiveplug.map.WebSocketHolder;
 import com.qg.exclusiveplug.model.Device;
 import com.qg.exclusiveplug.service.TcpService;
 import com.qg.exclusiveplug.util.DateUtil;
+import com.qg.exclusiveplug.util.HttpClientUtil;
 import com.qg.exclusiveplug.util.SmsUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -35,18 +38,22 @@ import java.util.List;
 @Slf4j
 public class TcpServiceImpl implements TcpService {
 
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
     private static final String CACHE_KEY = "devices";
 
     @Override
     public void messageHandler(String message) {
         assert message != null;
-        List<Device> devices = analysisMessage(message);
+        analysisMessage(message);
 
-        if (!CacheMap.containKey(CACHE_KEY)) {
+
+        /*if (!CacheMap.containKey(CACHE_KEY)) {
             CacheMap.put(CACHE_KEY, devices);
         } else {
             CacheMap.get(CACHE_KEY).addAll(devices);
-        }
+        }*/
     }
 
     /**
@@ -55,10 +62,10 @@ public class TcpServiceImpl implements TcpService {
      * @param message 消息
      * @return 设备对象
      */
-    private List<Device> analysisMessage(String message) {
+    private void analysisMessage(String message) {
         //解析参数
-        String[] parameters = message.split("end");
-        List<String> list = Arrays.asList(parameters);
+        String[] list = message.split("end");
+//        List<String> list = Arrays.asList(parameters);
         List<Device> devices = new LinkedList<>();
         for (String s : list) {
             //查看是哪个串口
@@ -92,11 +99,11 @@ public class TcpServiceImpl implements TcpService {
                 send(device, status);
             }
 
+            redisTemplate.opsForList().leftPush(CACHE_KEY, device);
 
             log.info("接收到数据：" + device.toString());
-            devices.add(device);
+//            devices.add(device);
         }
-        return devices;
     }
 
     /**
@@ -110,22 +117,20 @@ public class TcpServiceImpl implements TcpService {
         // 将设备信息放入交互类
         RequestData<Device> requestData = new RequestData<>();
         requestData.setData(device);
-        InteractBigData interactBigData = new InteractBigData();
-        interactBigData.setStatus(1);
+        InteractBigData interactBigData = null;
 
         // 与数据挖掘端交互
-        //TODO 因测试取消
-        /*try {
+        try {
             interactBigData = HttpClientUtil.demandedCount(DMUrlEnum.JUDGE_STATUS.getDMUrl(), requestData);
         } catch (IOException e) {
             log.debug("数据挖掘端连接失败");
             responseData.setStatus(StatusEnum.PREDICTED_FAILED.getStatus());
             e.printStackTrace();
-        }*/
+        }
 
-        /*if (null != interactBigData) {
+        if (null != interactBigData) {
             return interactBigData.getStatus();
-        }*/
+        }
 
         // 返回信息
         return 0;
