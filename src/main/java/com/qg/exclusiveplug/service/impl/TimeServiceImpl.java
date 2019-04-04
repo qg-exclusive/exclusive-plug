@@ -22,6 +22,7 @@ import org.springframework.data.redis.core.SessionCallback;
 import javax.annotation.Resource;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -85,6 +86,24 @@ public class TimeServiceImpl implements TimeService {
                 System.out.println(devices.size());
             }
         }
+    }
+
+    /**
+     * 收集昨日的数据并统计加入数据库
+     */
+    @Override
+    @Async
+    @Scheduled(fixedRate = 1000 * 60 * 60 * 24)
+    public void saveStatusToMySql() {
+        Date currentDate = new Date();
+        try {
+            currentDate = DateUtil.getCurrentDate();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(currentDate);
+
     }
 
         /*if (CacheMap.containKey(CACHE_KEY)) {

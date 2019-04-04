@@ -11,13 +11,16 @@ import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
 import com.qg.exclusiveplug.map.LongWaitList;
+import com.qg.exclusiveplug.map.NettyChannelHolder;
 import com.qg.exclusiveplug.map.TimeMap;
 import com.qg.exclusiveplug.map.WebSocketHolder;
 import com.qg.exclusiveplug.model.Device;
 import com.qg.exclusiveplug.service.TcpService;
 import com.qg.exclusiveplug.util.DateUtil;
+import com.qg.exclusiveplug.util.FormatMatchingUtil;
 import com.qg.exclusiveplug.util.HttpClientUtil;
 import com.qg.exclusiveplug.util.SmsUtil;
+import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -25,7 +28,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,28 +48,18 @@ public class TcpServiceImpl implements TcpService {
 
     @Override
     public void messageHandler(String message) {
-        assert message != null;
         analysisMessage(message);
 
-
-        /*if (!CacheMap.containKey(CACHE_KEY)) {
-            CacheMap.put(CACHE_KEY, devices);
-        } else {
-            CacheMap.get(CACHE_KEY).addAll(devices);
-        }*/
     }
 
     /**
      * 将tcp收到的消息解析成设备对象
      *
      * @param message 消息
-     * @return 设备对象
      */
     private void analysisMessage(String message) {
         //解析参数
         String[] list = message.split("end");
-//        List<String> list = Arrays.asList(parameters);
-        List<Device> devices = new LinkedList<>();
         for (String s : list) {
             //查看是哪个串口
             int index = (int) s.charAt(s.length() - 1) - 48;
@@ -83,23 +76,22 @@ public class TcpServiceImpl implements TcpService {
             String currentTime = DateUtil.currentTime();
 
             Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
-
+            // 向数据挖掘端发送设备信息
+            int status = sendDeviceToDM(device);
+            // 更新待机信息
+            try {
+                standBy(device, status);
+            } catch (ParseException e) {
+                log.info("当前时间解析失败");
+            }
+            device.setStatus(status);
+            redisTemplate.opsForList().leftPush(CACHE_KEY, device);
 
             // 如果需要发送数据
             if (WebSocketHolder.containsKey(index)) {
-                // 向数据挖掘端发送设备信息
-                int status = sendDeviceToDM(device);
-                // 更新待机信息
-                try {
-                    standBy(device, status);
-                } catch (ParseException e) {
-                    log.info("当前时间解析失败");
-                }
                 // 将数据传回给前端
                 send(device, status);
             }
-
-            redisTemplate.opsForList().leftPush(CACHE_KEY, device);
 
             log.info("接收到数据：" + device.toString());
 //            devices.add(device);

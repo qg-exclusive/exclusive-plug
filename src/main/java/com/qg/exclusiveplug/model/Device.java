@@ -63,6 +63,10 @@ public class Device implements Serializable {
      */
     private double cumulativePower;
 
+    /**
+     * 用电器状态
+     */
+    private int status;
 
     public Device(int index, String name, double current, double voltage,
                   double power, double powerFactor, double frequency, String date, double cumulativePower) {

@@ -1,6 +1,6 @@
 package com.qg.exclusiveplug.interceptor;
 
-import com.qg.exclusiveplug.listener.MySessionContext;
+import com.qg.exclusiveplug.listener.SessionContext;
 import com.qg.exclusiveplug.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
@@ -21,18 +21,23 @@ import java.util.Map;
  */
 @Service
 @Slf4j
-public class WebSocketInterceptor implements HandshakeInterceptor {
+public class WebSocketInterceptor implements HandshakeInterceptor{
+//    @Autowired
+//    private RedisTemplate<String, User> redisTemplate;
     @Override
     public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse,
-                                   WebSocketHandler webSocketHandler, Map<String, Object> map) throws Exception {
+                                   WebSocketHandler webSocketHandler, Map<String, Object> map) {
         log.info("webSocket握手请求...");
         if (serverHttpRequest instanceof ServletServerHttpRequest) {
             ServletServerHttpRequest servletRequest = (ServletServerHttpRequest) serverHttpRequest;
-            String jSessionId = servletRequest.getServletRequest().getParameter("jSessionId");
+            String jSessionId = servletRequest.getServletRequest().getParameter("JSESSIONID");
+            System.out.println(jSessionId);
+
             if (null != jSessionId && !jSessionId.equals("")) {
-                MySessionContext myc = MySessionContext.getInstance();
-                if (null != myc) {
-                    HttpSession httpSession = myc.getSession(jSessionId);
+                SessionContext sessionContext = SessionContext.getInstance();
+                if (null != sessionContext) {
+                    HttpSession httpSession = sessionContext.getSession(jSessionId);
+                    System.out.println(httpSession );
                     if (null != httpSession) {
                         User user = (User) httpSession.getAttribute("user");
                         if (null != user) {

@@ -8,6 +8,9 @@ import javax.servlet.http.HttpServletRequestWrapper;
 import java.io.*;
 import java.nio.charset.Charset;
 
+/**
+ * 代码来自网络，侵删
+ */
 public class BodyReaderHttpServletRequestWrapper  extends HttpServletRequestWrapper {
 
     private final byte[] body;
@@ -22,9 +25,9 @@ public class BodyReaderHttpServletRequestWrapper  extends HttpServletRequestWrap
      * 获取请求Body
      *
      * @param request 请求
-     * @return
+     * @return Body字符串
      */
-    public String getBodyString(final ServletRequest request) {
+    private String getBodyString(final ServletRequest request) {
         StringBuilder sb = new StringBuilder();
         InputStream inputStream = null;
         BufferedReader reader = null;
@@ -61,10 +64,9 @@ public class BodyReaderHttpServletRequestWrapper  extends HttpServletRequestWrap
     }
 
     /**
-     * Description: 复制输入流</br>
-     *
-     * @param inputStream
-     * @return</br>
+     * 复制输入流
+     * @param inputStream 请求输入流
+     * @return 复制出来的输入流
      */
     private InputStream cloneInputStream(ServletInputStream inputStream) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();

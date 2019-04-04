@@ -3,6 +3,7 @@ package com.qg.exclusiveplug.dtos;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.qg.exclusiveplug.model.*;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -12,7 +13,7 @@ import java.util.List;
  */
 @lombok.Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Data {
+public class Data implements Serializable {
 
     /**
      * 设备资料

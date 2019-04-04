@@ -1,6 +1,8 @@
 package com.qg.exclusiveplug.util;
 
 
+import com.google.common.cache.Cache;
+import com.google.common.cache.CacheBuilder;
 import lombok.extern.slf4j.Slf4j;
 
 import java.text.ParseException;
@@ -87,27 +89,6 @@ public class DateUtil {
     }
 
     /**
-     * 判断日期是否符合格式
-     *
-     * @param date 日期字符串
-     * @return 符合返回true，否则为false
-     */
-    public static boolean isDate(String date) {
-        String rexp = "^((\\d{2}(([02468][048])|([13579][26]))[\\-\\/\\s]?" +
-                "((((0?[13578])|(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|" +
-                "(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?" +
-                "((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?" +
-                "((0?[1-9])|([1-2][0-9])))))|(\\d{2}(([02468]" +
-                "[1235679])|([13579][01345789]))[\\-\\/\\s]?((((0?[13578])|" +
-                "(1[02]))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])" +
-                "|(11))[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?" +
-                "((0?[1-9])|(1[0-9])|(2[0-8]))))))";
-        Pattern pat = Pattern.compile(rexp);
-        Matcher mat = pat.matcher(date);
-        return mat.matches();
-    }
-
-    /**
      * 判断是否符合yyyy-MM-dd HH:mm:ss
      * @param patternString 时间
      * @return 结果
@@ -117,5 +98,11 @@ public class DateUtil {
         Pattern a = Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}");
         Matcher b = a.matcher(patternString);
         return b.matches();
+    }
+
+    public static void main(String[] args) {
+        Cache<String,String> cache = CacheBuilder.newBuilder().maximumSize(12).build();
+        cache.put("word","Hello Guava Cache");
+        System.out.println(cache.getIfPresent("word"));
     }
 }

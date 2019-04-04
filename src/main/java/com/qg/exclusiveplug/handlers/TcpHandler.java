@@ -23,9 +23,17 @@ import java.util.List;
  */
 @Component
 @Qualifier("serverHandler")
-@ChannelHandler.Sharable
 @Slf4j
+@ChannelHandler.Sharable
 public class TcpHandler extends SimpleChannelInboundHandler<String> {
+    /**
+     * 是否已存储端口号对应的连接
+     */
+    private boolean hasRead = false;
+
+    /**
+     * 心跳检测次数
+     */
     private int loss_connect_time = 0;
     private static final String PONG_MSG = "2";
 
@@ -44,25 +52,24 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
 
         } else {
             if(FormatMatchingUtil.isDeviceIndexs(message)){
-                String[] plugs = message.split(":");
-                for (int i = 1; i < plugs.length - 1; i++) {
-                    Integer deviceIndex = Integer.valueOf(plugs[i]);
+                String[] list = message.split(":");
+                for (String index : list) {
+                    Integer deviceIndex = Integer.valueOf(index);
                     if(NettyChannelHolder.containsKey(deviceIndex)) {
-                        log.info("NettyChannelHolder已包含该端口-->{}", plugs[i]);
+                        log.info("NettyChannelHolder已包含该端口-->{}", deviceIndex);
                         List<ChannelHandlerContext> channelHandlerContextList = NettyChannelHolder.get(deviceIndex);
 
                         if(!channelHandlerContextList.contains(channelHandlerContext)) {
                             channelHandlerContextList.add(channelHandlerContext);
-                            log.info("NettyChannelHolder新增端口-->{}", plugs[i]);
+                            log.info("NettyChannelHolder新增端口-->{}", deviceIndex);
                         }
                     } else {
-                        log.info("NettyChannelHolder端口已存在-->{}", plugs[i]);
+                        log.info("NettyChannelHolder端口已存在-->{}", deviceIndex);
 
                         List<ChannelHandlerContext> channelHandlerContextList = new ArrayList<>();
                         channelHandlerContextList.add(channelHandlerContext);
                         NettyChannelHolder.put(deviceIndex, channelHandlerContextList);
                     }
-
                 }
             } else {
                 log.info("数据格式错误");
@@ -118,8 +125,8 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
             loss_connect_time++;
             System.out.println(loss_connect_time);
             if(loss_connect_time > 2){
+                loss_connect_time = 0;
                 log.info("关闭不活动的连接 >> {}", ctx.channel().remoteAddress());
-                NettyChannelHolder.removeChannel(ctx);
                 ctx.channel().close();
             }
         } else {

@@ -30,21 +30,40 @@ import java.util.Date;
 @Service
 @Slf4j
 public class PredictServiceImpl implements PredictService {
-    private static int THREE = 3;
-    private static int ONE = 1;
+    /**
+     * 常量3
+     */
+    private final static int THREE = 3;
+
+    /**
+     * 常量1
+     */
+    private final static int ONE = 1;
+
+    /**
+     * 数据库开始时刻
+     */
+    private final static String START_TIME = "2018-11-30 00:00:00";
+
+    /**
+     * 日期格式
+     */
+    private final static String DATE_PATTERN = "yyyy-MM-dd";
+
+    private final static String TIME_PATTERN = "yyyy-MM-dd HH-mm-ss";
     @Autowired
     private QueryDeviceMapper queryDeviceMapper;
 
     @Override
     public ResponseData predictNowPowerSumService(String time, int index) {
-        if (index > THREE || index < ONE || !DateUtil.isDate(time)) {
+        if (index > THREE || index < ONE || !DateUtil.isTimeLegal(time)) {
             //参数有误
             log.error("前端传入参数有误");
             return new ResponseData(StatusEnum.PARAMETER_ERROR.getStatus(), null);
         }
 
         ResponseData responseData = new ResponseData();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
         Double[] doubles = new Double[7];
 
         try {
@@ -56,9 +75,16 @@ public class PredictServiceImpl implements PredictService {
                 String endTime = sdf.format(calendar.getTime());
                 calendar.add(Calendar.DAY_OF_MONTH, -1);
                 String startTime = sdf.format(calendar.getTime().getTime());
-                //add table name...
-                String tableName = "device" + time.replaceAll("-", "");
-                doubles[6 - i] = queryDeviceMapper.listPowerSum(index, startTime, endTime, tableName);
+
+                // 查询起始日期要大于数据库最低存储日期并且查询终止日期要小于当前日期
+                if (DateUtil.diffSecond(DateUtil.stringToDate(START_TIME, DATE_PATTERN),
+                        DateUtil.stringToDate(startTime, DATE_PATTERN)) < 0 && DateUtil.diffSecond(DateUtil.getCurrentDate(),
+                        DateUtil.stringToDate(endTime, DATE_PATTERN)) > 0) {
+                    //add table name...
+                    String tableName = "device" + time.replaceAll("-", "");
+                    doubles[6 - i] = queryDeviceMapper.listPowerSum(index, startTime, endTime, tableName);
+                }
+
                 // 判空，防止无数据的情况发生
                 if (null == doubles[6 - i]) {
                     doubles[6 - i] = 0.0;

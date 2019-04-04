@@ -40,7 +40,6 @@ public class InteractionData {
      * 用户信息
      */
     User user;
-
     /**
      * 用户设备关联信息
      */

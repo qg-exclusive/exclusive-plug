@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.text.ParseException;
 
 
 /**
@@ -23,7 +24,13 @@ public class QueryDeviceController {
 
     @RequestMapping("/pastpowersum")
     public ResponseData getPassPowerSum(@RequestBody InteractionData interactionData) {
-        return queryDeviceService.listPowerSum(interactionData);
+        ResponseData responseData = null;
+        try {
+            responseData = queryDeviceService.listPowerSum(interactionData);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return responseData;
     }
 
     @PostMapping("/queryindex")

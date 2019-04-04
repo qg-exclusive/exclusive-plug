@@ -1,3 +1,4 @@
+/*
 package com.qg.exclusiveplug.util;
 
 import sun.misc.BASE64Decoder;
@@ -23,12 +24,6 @@ public class DESUtil {
         }
     }
 
-    /**
-     * 加密
-     *
-     * @param str
-     * @return
-     */
     public static String getEncryptString(String str) {
         BASE64Encoder base64en = new BASE64Encoder();
         try {
@@ -42,12 +37,7 @@ public class DESUtil {
         }
     }
 
-    /**
-     * 解密
-     *
-     * @param str
-     * @return
-     */
+
     public static String getDecryptString(String str) {
         BASE64Decoder base64De = new BASE64Decoder();
         try {
@@ -61,18 +51,5 @@ public class DESUtil {
         }
 
     }
-
-    public static void main(String[] args) throws Exception {
-        if (args == null || args.length < 1) {
-            System.out.println("请输入要加密的字符，用空格分隔.");
-        } else {
-            for (String arg : args) {
-                System.out.println(arg + ":" + getEncryptString(arg));
-                System.out.println(getEncryptString(arg) + ":" + getDecryptString(getEncryptString(arg)));
-            }
-        }
-
-        //System.out.println(getDecryptString("WnplV/ietfQ="));
-        //System.out.println(getDecryptString("gJQ9O+q34qk="));
-    }
 }
+*/

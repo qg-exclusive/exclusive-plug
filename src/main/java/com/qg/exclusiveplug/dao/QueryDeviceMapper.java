@@ -32,4 +32,6 @@ public interface QueryDeviceMapper {
      * @return 某串口某时间段内的总用电量
      */
     Double listPowerSum(@Param("index") int index, @Param("startTime") String startTime, @Param("endTime") String endTime,@Param("tableName")String tableName);
+
+    List<Device> listAllDevice(@Param("index") int index, @Param("tabeleName") String tableName);
 }

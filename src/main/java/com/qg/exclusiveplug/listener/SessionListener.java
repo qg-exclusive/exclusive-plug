@@ -7,8 +7,6 @@ import javax.servlet.annotation.WebListener;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.HttpSessionEvent;
 import javax.servlet.http.HttpSessionListener;
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * @author HuaChen
@@ -18,16 +16,15 @@ import java.util.Map;
 @WebListener
 @Slf4j
 public class SessionListener implements HttpSessionListener {
-    public static Map userMap = new HashMap();
-    private   MySessionContext myc=MySessionContext.getInstance();
+    private SessionContext sessionContext = SessionContext.getInstance();
 
     public void sessionCreated(HttpSessionEvent httpSessionEvent) {
         log.info("创建Session");
-        myc.AddSession(httpSessionEvent.getSession());
+        sessionContext.AddSession(httpSessionEvent.getSession());
     }
 
     public void sessionDestroyed(HttpSessionEvent httpSessionEvent) {
         HttpSession session = httpSessionEvent.getSession();
-        myc.DelSession(session);
+        sessionContext.DelSession(session);
     }
 }

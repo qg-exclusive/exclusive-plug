@@ -1,10 +1,10 @@
 package com.qg.exclusiveplug.service.impl;
 
+import com.qg.exclusiveplug.constant.StatusEnum;
 import com.qg.exclusiveplug.dao.ActionDeviceMapper;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.constant.StatusEnum;
 import com.qg.exclusiveplug.handlers.TcpHandler;
 import com.qg.exclusiveplug.map.LongWaitList;
 import com.qg.exclusiveplug.map.TimeMap;
@@ -16,11 +16,15 @@ import com.qg.exclusiveplug.service.ActionDeviceService;
 import com.qg.exclusiveplug.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
 import java.text.ParseException;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Map;
+import java.util.Objects;
 
 
 @Service
@@ -71,7 +75,8 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
     public ResponseData addDevice(InteractionData interactionData, HttpSession httpSession) {
         ResponseData responseData = new ResponseData();
         User user = (User) httpSession.getAttribute("user");
-        int userId = user.getUserId();
+        log.info("增加用户设备-->>用户信息：{}", user);
+        Integer userId = user.getUserId();
         String uuid = interactionData.getUuid();
         log.info("增加设备-->>用户ID:{},uuid:{}", userId, uuid);
 
@@ -295,6 +300,7 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
      * @param httpSession     用户信息
      * @return 操作结果
      */
+    @Async
     @Override
     public ResponseData timing(InteractionData interactionData, HttpSession httpSession) {
         ResponseData responseData = new ResponseData();
@@ -304,8 +310,8 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
         int index = interactionData.getIndex();
         String time = interactionData.getTime();
 
-        log.info("定时任务-->> 关键词：{}， 端口：{}， 时间：{}",key, index, time);
-        if(DateUtil.isDate(time)) {
+        log.info("定时任务-->> 状态切换：{}， 端口：{}， 时间：{}",key, index, time);
+        if(DateUtil.isTimeLegal(time)) {
             Calendar timingCal = Calendar.getInstance();
 
             // get timingTask's Cal
@@ -339,6 +345,7 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
                 }
 
                 String message = "#" + index + "-" + key + "$";
+                //TODO bug
                 log.info("定时任务" + message);
                 new TcpHandler().send(index, message);
 

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.map.WebSocketHolder;
 import com.qg.exclusiveplug.model.User;
+import com.qg.exclusiveplug.util.FormatMatchingUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
@@ -32,12 +33,19 @@ public class MyWebSocketHandler implements WebSocketHandler {
     @Override
     public void handleMessage(WebSocketSession webSocketSession,
                               WebSocketMessage<?> webSocketMessage) throws Exception {
-        log.info("接收信息 >> {}", webSocketMessage.getPayload());
+        String message = webSocketMessage.getPayload().toString();
+        log.info("接收信息 >> {}", message);
 
         Map<Integer, Integer> integerIntegermap = ((User) webSocketSession.getAttributes()
                 .get(String.valueOf(webSocketSession.getRemoteAddress()))).getIndexPrivilegeMap();
 
-        int deviceIndex = Integer.valueOf(String.valueOf(webSocketMessage.getPayload()).split(":")[1]);
+        if (!FormatMatchingUtil.isDeviceIndex(message)) {
+            log.error("Websocket-->>前端信息不符合格式，已断开连接");
+            webSocketSession.close();
+            return;
+        }
+
+        int deviceIndex = Integer.valueOf(String.valueOf(message).split(":")[1]);
 
         log.info("切换串口：" + deviceIndex);
 

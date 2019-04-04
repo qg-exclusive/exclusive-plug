@@ -1,14 +1,14 @@
 package com.qg.exclusiveplug.service.impl;
 
 import com.aliyuncs.exceptions.ClientException;
+import com.qg.exclusiveplug.constant.SmsEnum;
+import com.qg.exclusiveplug.constant.StatusEnum;
+import com.qg.exclusiveplug.constant.UserEnum;
 import com.qg.exclusiveplug.dao.ActionDeviceMapper;
 import com.qg.exclusiveplug.dao.UserMapper;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.constant.SmsEnum;
-import com.qg.exclusiveplug.constant.StatusEnum;
-import com.qg.exclusiveplug.constant.UserEnum;
 import com.qg.exclusiveplug.map.HttpSessionHandler;
 import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.model.UserDeviceInfo;
@@ -59,7 +59,6 @@ public class UserServiceImpl implements UserService {
         String userPassword = interactionData.getUser().getUserPassword();
         String checkCode = interactionData.getCheckCodeKey();
         log.info("注册用户手机号-->{}", userPhone);
-
         // 判空
         if (null != userPhone && null != userPassword && FormatMatchingUtil.isPhoneLegal(userPhone) && null != checkCode
                 && !checkCode.equals("") && FormatMatchingUtil.isCheckCode(checkCode)
@@ -273,7 +272,9 @@ public class UserServiceImpl implements UserService {
 
         // 注入session
         httpSession.setAttribute("user", user);
+        httpSession.setAttribute("userinfo", user.getUserPhone());
         HttpSessionHandler.put(user.getUserId(), httpSession);
+        System.err.print(httpSession.getId());
 
         // 返回用户所有的端口以及权限
         Data data = new Data();
@@ -290,6 +291,6 @@ public class UserServiceImpl implements UserService {
         for (int i = 0; i < length; i++) {
             stringBuilder.append(random.nextInt(10));
         }
-        return String.valueOf(stringBuilder);
+        return stringBuilder.toString();
     }
 }

@@ -3,6 +3,7 @@ package com.qg.exclusiveplug.config;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.KeyGenerator;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.cache.RedisCacheConfiguration;
@@ -13,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
@@ -81,4 +83,23 @@ public class RedisConfig extends CachingConfigurerSupport {
         sessionRepository.setDefaultMaxInactiveInterval(36000);
         return sessionRepository;
     }*/
+
+    @Override
+    public KeyGenerator keyGenerator() {
+        KeyGenerator keyGenerator = new KeyGenerator() {
+            @Override
+            public Object generate(Object o, Method method, Object... objects) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(o.getClass().getName());
+                sb.append(method.getName());
+                for (Object obj : objects) {
+                    sb.append(obj.toString()+"   :1024");
+                }
+                return sb.toString();
+            }
+        };
+        //default : Arrays.deepHashCode(objects)
+        return keyGenerator;
+    }
+
 }

@@ -19,6 +19,7 @@ import java.util.Map;
 public class ActionDeviceFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) {
+        log.info("用户操作过滤器-->>初始化");
 
     }
 

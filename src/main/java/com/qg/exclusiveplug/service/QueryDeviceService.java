@@ -4,6 +4,7 @@ import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 
 import javax.servlet.http.HttpSession;
+import java.text.ParseException;
 
 /**
  * @author Wilder
@@ -16,7 +17,7 @@ public interface QueryDeviceService {
      * @param interactionData key(天/月/周)，时间
      * @return 状态码和用电量集合
      */
-    ResponseData listPowerSum(InteractionData interactionData);
+    ResponseData listPowerSum(InteractionData interactionData) throws ParseException;
 
     /**
      * 得到用户的所有端口以及权限

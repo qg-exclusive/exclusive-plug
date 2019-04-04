@@ -11,44 +11,71 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.Map;
 
 @Slf4j
-@WebFilter(filterName = "actiondevice", urlPatterns = {"/querydevice/*"})
+@WebFilter(filterName = "querydevice", urlPatterns = {"/querydevice/*"})
 public class QueryDeviceFilter implements Filter {
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
+        log.info("用户查看过滤器-->>初始化");
 
     }
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
-        log.info("用户查看拦截器");
+        log.info("用户查看过滤器-->>开始过滤");
+
         ResponseData responseData = new ResponseData();
 
-        BodyReaderHttpServletRequestWrapper myRequestWrapper = null;
+//        BodyReaderHttpServletRequestWrapper myRequestWrapper;
 
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+        String valueStr = "";
+        try {
+            StringBuilder sb = new StringBuilder();
+            BufferedReader br = new BufferedReader(httpServletRequest.getReader());
+            String s = "";
+            while ((s = br.readLine()) != null) {
+                sb.append(s);
+            }
+            valueStr = sb.toString();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        System.out.println("valusStr:" + valueStr);
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
 
         // 封装请求参数
-        myRequestWrapper = new BodyReaderHttpServletRequestWrapper(httpServletRequest);
-        int index = new Gson().fromJson(myRequestWrapper.getReader(), InteractionData.class).getIndex();
-        User user = (User) myRequestWrapper.getSession().getAttribute("user");
+//        myRequestWrapper = new BodyReaderHttpServletRequestWrapper(httpServletRequest);
 
-        String url = myRequestWrapper.getRequestURI();
-        log.info("用户正在访问-->{}", url);
+        String url = httpServletRequest.getRequestURI();
+        User user = (User) httpServletRequest.getSession().getAttribute("user");
+//        String url = myRequestWrapper.getRequestURI();
+//        User user = (User) myRequestWrapper.getSession().getAttribute("user");
+        log.info("用户查看过滤器-->>正在访问{}", url);
 
-        if(null != user) {
+        if (null != user) {
             Map<Integer, Integer> indexPrivilegeMap = user.getIndexPrivilegeMap();
-            if(indexPrivilegeMap.containsKey(index)) {
-                filterChain.doFilter(myRequestWrapper, servletResponse);
-                return;
+            log.info("用户查看过滤器-->>用户信息：{}", user.toString());
+
+            // 是否查看该用户所有权限
+            if (!url.equals("/querydevice/queryindex")) {
+                int index = new Gson().fromJson(httpServletRequest.getReader(), InteractionData.class).getIndex();
+                if (indexPrivilegeMap.containsKey(index)) {
+                    filterChain.doFilter(httpServletRequest, servletResponse);
+                    return;
+                } else {
+                    log.info("用户权限不足,权限值为:{}", indexPrivilegeMap.values());
+                    responseData.setStatus(StatusEnum.USER_HASNOPRIVILEGE.getStatus());
+                }
             } else {
-                log.info("用户权限不足,权限值为:{}", indexPrivilegeMap.values());
-                responseData.setStatus(StatusEnum.USER_HASNOPRIVILEGE.getStatus());
+                filterChain.doFilter(httpServletRequest, servletResponse);
+                return;
             }
+
         } else {
             log.info("用户未登陆");
             responseData.setStatus(StatusEnum.USER_ISNOLOGIN.getStatus());
