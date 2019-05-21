@@ -11,16 +11,13 @@ import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
 import com.qg.exclusiveplug.map.LongWaitList;
-import com.qg.exclusiveplug.map.NettyChannelHolder;
 import com.qg.exclusiveplug.map.TimeMap;
 import com.qg.exclusiveplug.map.WebSocketHolder;
 import com.qg.exclusiveplug.model.Device;
 import com.qg.exclusiveplug.service.TcpService;
 import com.qg.exclusiveplug.util.DateUtil;
-import com.qg.exclusiveplug.util.FormatMatchingUtil;
 import com.qg.exclusiveplug.util.HttpClientUtil;
 import com.qg.exclusiveplug.util.SmsUtil;
-import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -28,8 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author WilderGao
@@ -43,6 +38,7 @@ public class TcpServiceImpl implements TcpService {
 
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
+
 
     private static final String CACHE_KEY = "devices";
 
@@ -77,7 +73,8 @@ public class TcpServiceImpl implements TcpService {
 
             Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
             // 向数据挖掘端发送设备信息
-            int status = sendDeviceToDM(device);
+//            int status = sendDeviceToDM(device);
+            int status = 0;
             // 更新待机信息
             try {
                 standBy(device, status);
@@ -85,6 +82,7 @@ public class TcpServiceImpl implements TcpService {
                 log.info("当前时间解析失败");
             }
             device.setStatus(status);
+            System.out.print("ss" + redisTemplate);
             redisTemplate.opsForList().leftPush(CACHE_KEY, device);
 
             // 如果需要发送数据
@@ -94,7 +92,6 @@ public class TcpServiceImpl implements TcpService {
             }
 
             log.info("接收到数据：" + device.toString());
-//            devices.add(device);
         }
     }
 

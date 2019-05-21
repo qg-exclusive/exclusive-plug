@@ -40,4 +40,9 @@
             )
         )AS total;
     </select>
+    <select id="listAllDevice" resultType="device">
+        SELECT *
+        FROM ${tableName}
+        WHERE index_num = ${index}
+    </select>
 </mapper>

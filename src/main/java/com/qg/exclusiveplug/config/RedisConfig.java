@@ -1,5 +1,6 @@
 package com.qg.exclusiveplug.config;
 
+import com.qg.exclusiveplug.model.User;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.CachingConfigurerSupport;
 import org.springframework.cache.annotation.EnableCaching;
@@ -11,7 +12,7 @@ import org.springframework.data.redis.cache.RedisCacheManager;
 import org.springframework.data.redis.cache.RedisCacheWriter;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.JdkSerializationRedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 import java.lang.reflect.Method;
@@ -52,10 +53,11 @@ public class RedisConfig extends CachingConfigurerSupport {
         RedisTemplate<String, T> redisTemplate = new RedisTemplate<>();
         System.out.println("加载redis配置");
 
-        Jackson2JsonRedisSerializer j = new Jackson2JsonRedisSerializer(Object.class);
+        JdkSerializationRedisSerializer jdkSerializationRedisSerializer = new JdkSerializationRedisSerializer(User.class.getClassLoader());
+//        Jackson2JsonRedisSerializer j = new Jackson2JsonRedisSerializer(User.class);
         // value值得序列化采用fastJsonRedisSerializer
-        redisTemplate.setValueSerializer(j);
-        redisTemplate.setHashValueSerializer(j);
+        redisTemplate.setValueSerializer(jdkSerializationRedisSerializer);
+        redisTemplate.setHashValueSerializer(jdkSerializationRedisSerializer);
         // key的序列化采用StringRedisSerializer
         redisTemplate.setKeySerializer(new StringRedisSerializer());
         redisTemplate.setHashKeySerializer(new StringRedisSerializer());

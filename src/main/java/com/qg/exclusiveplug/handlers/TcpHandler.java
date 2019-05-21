@@ -47,6 +47,7 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
 
         sendPongMsg(channelHandlerContext);
 
+        // 若是符合条件的信息则进入service层处理
         if(FormatMatchingUtil.isServiceInfo(message)){
             tcpService.messageHandler(message);
 

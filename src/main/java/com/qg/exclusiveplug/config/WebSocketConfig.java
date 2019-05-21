@@ -22,11 +22,13 @@ public class WebSocketConfig implements WebSocketConfigurer {
     private int loss_connect_time = 0;
     @Autowired
     private WebSocketHandler handler;
+    @Autowired
+    private WebSocketInterceptor webSocketInterceptor;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        registry.addHandler(handler, "/message").addInterceptors(new WebSocketInterceptor()).setAllowedOrigins("*");
-        registry.addHandler(handler, "/sockjs/message").addInterceptors(new WebSocketInterceptor()).setAllowedOrigins("*").withSockJS();
+        registry.addHandler(handler, "/message").addInterceptors(webSocketInterceptor).setAllowedOrigins("*");
+        registry.addHandler(handler, "/sockjs/message").addInterceptors(webSocketInterceptor).setAllowedOrigins("*").withSockJS();
     }
 
     /*@Override

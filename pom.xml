@@ -35,6 +35,10 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
         <dependency>
@@ -144,11 +148,15 @@
             <artifactId>spring-session-data-redis</artifactId>
         </dependency>
         <!--阿里巴巴json-->
-        <!-- https://mvnrepository.com/artifact/com.alibaba/fastjson -->
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
             <version>1.2.47</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>23.0</version>
         </dependency>
     </dependencies>
 
@@ -169,12 +177,12 @@
                     </compilerArguments>
                 </configuration>
             </plugin>
-            <plugin> 
+            <!--<plugin> 
                 <groupId>org.apache.maven.plugins</groupId> 
                 <artifactId>maven-resources-plugin</artifactId> 
                 <configuration>
                     <encoding>UTF-8</encoding>
-                        <!-- 过滤后缀为pem、pfx的证书文件 -->    
+                        &lt;!&ndash; 过滤后缀为pem、pfx的证书文件 &ndash;&gt;    
                     <nonFilteredFileExtensions>    
                         <nonFilteredFileExtension>pem</nonFilteredFileExtension>       
                         <nonFilteredFileExtension>pfx</nonFilteredFileExtension>           
@@ -184,7 +192,7 @@
                         <nonFilteredFileExtension>swf</nonFilteredFileExtension>        
                     </nonFilteredFileExtensions>
                 </configuration>
-            </plugin>
+            </plugin>-->
         </plugins>
     </build>
 

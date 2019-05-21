@@ -29,7 +29,7 @@ public class FormatMatchingUtil {
      * @return 符合返回true，否则为false
      */
     public static boolean isServiceInfo(String serviceInfo) {
-        String rexp = "(\\w*:V_\\d:[0-9]+[.][0-9]*,I_\\d:[0-9]+[.][0-9]*,P_\\d:[0-9]+[.][0-9]*,PF_\\d:[-]?[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*end).*";
+        String rexp = "(\\w*:V_\\d:[0-9]+[.][0-9]*,I_\\d:[0-9]+[.][0-9]*,P_\\d:[0-9]+[.][0-9]*,PF_\\d:[-]?[0-9]+[.][0-9]*,F_\\d:[0-9]+[.][0-9]*,W_\\d:[0-9]+[.][0-9]*end)*";
         Pattern pat = Pattern.compile(rexp);
         Matcher matcher = pat.matcher(serviceInfo);
         return matcher.matches();
