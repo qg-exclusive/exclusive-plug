@@ -90,7 +90,6 @@ public class TcpServiceImpl implements TcpService {
                 send(device, status);
             }
 
-//            log.info("接收到数据：" + device.toString());
         }
     }
 

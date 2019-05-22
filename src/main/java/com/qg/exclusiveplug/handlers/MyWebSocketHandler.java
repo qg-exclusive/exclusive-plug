@@ -6,6 +6,8 @@ import com.qg.exclusiveplug.map.WebSocketHolder;
 import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.util.FormatMatchingUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.socket.*;
 
@@ -24,9 +26,11 @@ import java.util.Map;
 @Slf4j
 public class MyWebSocketHandler implements WebSocketHandler {
 
-    @Override
-    public void afterConnectionEstablished(WebSocketSession webSocketSession) throws Exception {
+    @Autowired
+    private RedisTemplate<String, User> redisTemplate;
 
+    @Override
+    public void afterConnectionEstablished(WebSocketSession webSocketSession) {
         log.info("成功建立连接");
     }
 
@@ -36,8 +40,15 @@ public class MyWebSocketHandler implements WebSocketHandler {
         String message = webSocketMessage.getPayload().toString();
         log.info("接收信息 >> {}", message);
 
-        Map<Integer, Integer> integerIntegermap = ((User) webSocketSession.getAttributes()
-                .get(String.valueOf(webSocketSession.getRemoteAddress()))).getIndexPrivilegeMap();
+        String token = (String) webSocketSession.getAttributes().get(String.valueOf(webSocketSession.getRemoteAddress()));
+        User user = (User) redisTemplate.opsForHash().get("spring:session:sessions:" + token, "sessionAttr:user");
+
+        if (null == user) {
+            webSocketSession.close();
+            return;
+        }
+
+        Map<Integer, Integer> integerIntegermap = user.getIndexPrivilegeMap();
 
         if (!FormatMatchingUtil.isDeviceIndex(message)) {
             log.error("Websocket-->>前端信息不符合格式，已断开连接");
@@ -53,8 +64,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
         removeWebSocketSession(integerIntegermap, webSocketSession);
 
         // 判断权限
-        if(integerIntegermap.containsKey(deviceIndex)) {
-            if(WebSocketHolder.containsKey(deviceIndex)) {
+        if (integerIntegermap.containsKey(deviceIndex)) {
+            if (WebSocketHolder.containsKey(deviceIndex)) {
                 List<WebSocketSession> websocketSessionList = WebSocketHolder.getWebsocketSessionList(deviceIndex);
                 if (!websocketSessionList.contains(webSocketSession)) {
                     websocketSessionList.add(webSocketSession);
@@ -70,15 +81,16 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
     @Override
     public void handleTransportError(WebSocketSession webSocketSession,
-                                     Throwable throwable) throws Exception {
+                                     Throwable throwable) {
         log.info("{}连接出现异常", webSocketSession.getId());
     }
 
     @Override
     public void afterConnectionClosed(WebSocketSession webSocketSession,
-                                      CloseStatus closeStatus) throws Exception {
-        Map<Integer, Integer> integerIntegermap = ((User) webSocketSession.getAttributes()
-                .get(String.valueOf(webSocketSession.getRemoteAddress()))).getIndexPrivilegeMap();
+                                      CloseStatus closeStatus) {
+        String token = (String) webSocketSession.getAttributes().get(String.valueOf(webSocketSession.getRemoteAddress()));
+
+        Map<Integer, Integer> integerIntegermap = ((User) redisTemplate.opsForHash().get("spring:session:sessions:" + token, "sessionAttr:user")).getIndexPrivilegeMap();
 
 
         removeWebSocketSession(integerIntegermap, webSocketSession);
@@ -92,7 +104,8 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
     /**
      * 发送某一端口的数据给在线用户
-     * @param deviceIndex 产生的端口数据
+     *
+     * @param deviceIndex  产生的端口数据
      * @param responseData 返回数据
      */
     public static void send(int deviceIndex, ResponseData responseData) {
@@ -108,10 +121,11 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
     /**
      * 去除连接
+     *
      * @param integerIntegermap 端口权限集合
-     * @param webSocketSession 连接
+     * @param webSocketSession  连接
      */
-    private void removeWebSocketSession(Map<Integer, Integer> integerIntegermap, WebSocketSession webSocketSession){
+    private void removeWebSocketSession(Map<Integer, Integer> integerIntegermap, WebSocketSession webSocketSession) {
         Integer deviceIndex = null;
         WebSocketSession save = null;
         for (Integer integer : integerIntegermap.keySet()) {

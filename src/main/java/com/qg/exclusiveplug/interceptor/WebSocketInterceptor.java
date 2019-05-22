@@ -40,7 +40,7 @@ public class WebSocketInterceptor implements HandshakeInterceptor {
 
                 if (null != user) {
                     log.info("user用户：" + user);
-                    map.put(serverHttpRequest.getRemoteAddress().toString(), user);
+                    map.put(serverHttpRequest.getRemoteAddress().toString(), token);
                     return true;
                 }
             }

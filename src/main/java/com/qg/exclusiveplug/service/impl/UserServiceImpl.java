@@ -9,7 +9,6 @@ import com.qg.exclusiveplug.dao.UserMapper;
 import com.qg.exclusiveplug.dtos.Data;
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.map.HttpSessionHandler;
 import com.qg.exclusiveplug.model.User;
 import com.qg.exclusiveplug.model.UserDeviceInfo;
 import com.qg.exclusiveplug.service.UserService;
@@ -273,7 +272,6 @@ public class UserServiceImpl implements UserService {
         // 注入session
         httpSession.setAttribute("user", user);
         httpSession.setAttribute("userinfo", user.getUserPhone());
-        HttpSessionHandler.put(user.getUserId(), httpSession);
         System.err.print(httpSession.getId());
 
         // 返回用户所有的端口以及权限
