@@ -30,13 +30,16 @@ public class QueryDeviceFilter implements Filter {
 
         ResponseData responseData = new ResponseData();
 
-//        BodyReaderHttpServletRequestWrapper myRequestWrapper;
-
         HttpServletRequest httpServletRequest = (HttpServletRequest) servletRequest;
+
+        BodyReaderHttpServletRequestWrapper myRequestWrapper;
+        // 封装请求参数
+        myRequestWrapper = new BodyReaderHttpServletRequestWrapper(httpServletRequest);
+
         String valueStr = "";
         try {
             StringBuilder sb = new StringBuilder();
-            BufferedReader br = new BufferedReader(httpServletRequest.getReader());
+            BufferedReader br = new BufferedReader(myRequestWrapper.getReader());
             String s = "";
             while ((s = br.readLine()) != null) {
                 sb.append(s);
@@ -48,13 +51,12 @@ public class QueryDeviceFilter implements Filter {
         System.out.println("valusStr:" + valueStr);
         HttpServletResponse httpServletResponse = (HttpServletResponse) servletResponse;
 
-        // 封装请求参数
-//        myRequestWrapper = new BodyReaderHttpServletRequestWrapper(httpServletRequest);
 
-        String url = httpServletRequest.getRequestURI();
-        User user = (User) httpServletRequest.getSession().getAttribute("user");
-//        String url = myRequestWrapper.getRequestURI();
-//        User user = (User) myRequestWrapper.getSession().getAttribute("user");
+
+//        String url = httpServletRequest.getRequestURI();
+//        User user = (User) httpServletRequest.getSession().getAttribute("user");
+        String url = myRequestWrapper.getRequestURI();
+        User user = (User) myRequestWrapper.getSession().getAttribute("user");
         log.info("用户查看过滤器-->>正在访问{}", url);
 
         if (null != user) {
@@ -63,16 +65,16 @@ public class QueryDeviceFilter implements Filter {
 
             // 是否查看该用户所有权限
             if (!url.equals("/querydevice/queryindex")) {
-                int index = new Gson().fromJson(httpServletRequest.getReader(), InteractionData.class).getIndex();
+                int index = new Gson().fromJson(myRequestWrapper.getReader(), InteractionData.class).getIndex();
                 if (indexPrivilegeMap.containsKey(index)) {
-                    filterChain.doFilter(httpServletRequest, servletResponse);
+                    filterChain.doFilter(myRequestWrapper, servletResponse);
                     return;
                 } else {
                     log.info("用户权限不足,权限值为:{}", indexPrivilegeMap.values());
                     responseData.setStatus(StatusEnum.USER_HASNOPRIVILEGE.getStatus());
                 }
             } else {
-                filterChain.doFilter(httpServletRequest, servletResponse);
+                filterChain.doFilter(myRequestWrapper, servletResponse);
                 return;
             }
 

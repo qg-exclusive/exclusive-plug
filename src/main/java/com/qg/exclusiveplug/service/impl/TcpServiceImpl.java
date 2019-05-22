@@ -82,7 +82,6 @@ public class TcpServiceImpl implements TcpService {
                 log.info("当前时间解析失败");
             }
             device.setStatus(status);
-            System.out.print("ss" + redisTemplate);
             redisTemplate.opsForList().leftPush(CACHE_KEY, device);
 
             // 如果需要发送数据
@@ -91,7 +90,7 @@ public class TcpServiceImpl implements TcpService {
                 send(device, status);
             }
 
-            log.info("接收到数据：" + device.toString());
+//            log.info("接收到数据：" + device.toString());
         }
     }
 

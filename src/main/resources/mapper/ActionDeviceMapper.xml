@@ -55,7 +55,7 @@
         WHERE device_index = ${deviceIndex}
     </delete>
     <select id="queryUserDeviceInfo" resultType="UserDeviceInfo">
-        SELECT device_index, user_privilege
+        SELECT user_id, device_index, user_privilege
         FROM user_device
         WHERE user_id = ${userId}
         AND device_index = ${deviceIndex}

@@ -100,7 +100,7 @@ public class ActionDeviceServiceImpl implements ActionDeviceService {
                     // 更改权限
                     log.info("增加设备-->> 更改权限");
                     userDeviceInfo.setUserPrivilege(devicePrivilege);
-                    actionDeviceMapper.updateUserDeviceInfo(new UserDeviceInfo(userId, deviceIndex, devicePrivilege));
+                    actionDeviceMapper.updateUserDeviceInfo(userDeviceInfo);
                     integerIntegerMap.replace(deviceIndex, devicePrivilege);
                 }
                 // 替换权限

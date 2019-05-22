@@ -11,7 +11,6 @@ import com.qg.exclusiveplug.service.QueryDeviceService;
 import com.qg.exclusiveplug.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.HttpSession;
@@ -103,6 +102,7 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
      * @return 该天24小时各自的用电量
      */
     private List<PowerSum> listPowerSumByDay(int deviceIndex, String time) throws ParseException {
+        log.info("按天查询");
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         List<PowerSum> powerSumList = new ArrayList<>();
 
@@ -120,7 +120,7 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
             calendar.add(Calendar.HOUR_OF_DAY, 1);
             String endTime = sdf.format(calendar.getTime().getTime());
 
-            powerSumList = listPowerSum(deviceIndex, startTime, endTime);
+            powerSumList.add(listPowerSum(deviceIndex, startTime, endTime));
         }
         return powerSumList;
     }
@@ -143,7 +143,7 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
                 String startTime = sdf.format(calendar.getTime());
                 calendar.add(Calendar.DAY_OF_WEEK, 1);
                 String endTime = sdf.format(calendar.getTime().getTime());
-                powerSumList = listPowerSum(deviceIndex, startTime, endTime);
+                powerSumList.add(listPowerSum(deviceIndex, startTime, endTime));
             }
         } catch (ParseException e) {
             e.printStackTrace();
@@ -187,8 +187,8 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
     private boolean checkTime(String startTime, String endTime) throws ParseException {
         // 查询起始日期要大于数据库最低存储日期并且查询终止日期要小于当前日期
         return DateUtil.diffSecond(DateUtil.stringToDate(START_TIME, DATE_PATTERN),
-                DateUtil.stringToDate(startTime, DATE_PATTERN)) < 0 && DateUtil.diffSecond(DateUtil.getCurrentDate(),
-                DateUtil.stringToDate(endTime, DATE_PATTERN)) > 0;
+                DateUtil.stringToDate(startTime, DATE_PATTERN)) > 0 && DateUtil.diffSecond(DateUtil.getCurrentDate(),
+                DateUtil.stringToDate(endTime, DATE_PATTERN)) < 0;
     }
 
     /**
@@ -199,19 +199,20 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
      * @return 用电量列表
      * @throws ParseException 转换失败异常
      */
-    private List<PowerSum> listPowerSum(int deviceIndex, String startTime, String endTime) throws ParseException {
+    private PowerSum listPowerSum(int deviceIndex, String startTime, String endTime) throws ParseException {
         List<PowerSum> powerSumList = new ArrayList<>();
+        PowerSum powerSum = new PowerSum();
         if (checkTime(startTime, endTime)) {
             // 以天为单位
-            String tableName = "device" + startTime.replaceAll("-", "");
-            PowerSum powerSum = new PowerSum(startTime.split(" ")[1].split(":")[0],
+            String tableName = "device" + startTime.split(" ")[0].replaceAll("-", "");
+            log.info("查询数据表：" + tableName);
+            powerSum = new PowerSum(startTime.split(" ")[1].split(":")[0],
                     queryDeviceMapper.listPowerSum(deviceIndex, startTime, endTime, tableName));
-            log.info("开始时间：" + startTime + "结束时间：" + endTime);
-            powerSumList.add(powerSum);
+            log.info("设备号：" + deviceIndex + "开始时间：" + startTime + "结束时间：" + endTime + "查询数据：" + powerSum);
         } else {
-            powerSumList.add(new PowerSum());
+            log.info("查询数据不符合格式,开始时间{}, 结束时间{}", startTime, endTime);
         }
-        return powerSumList;
+        return powerSum;
     }
 
 }

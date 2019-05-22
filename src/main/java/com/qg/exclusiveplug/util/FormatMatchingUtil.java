@@ -148,7 +148,7 @@ public class FormatMatchingUtil {
      */
     public static boolean isDeviceIndex(String message) {
         if (null != message) {
-            String regExp = "\"index\":[0-9]*";
+            String regExp = "\\{\"index\":[0-9]*}";
             Pattern p = Pattern.compile(regExp);
             Matcher m = p.matcher(message);
             return m.matches();

@@ -45,7 +45,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
             return;
         }
 
-        int deviceIndex = Integer.valueOf(String.valueOf(message).split(":")[1]);
+        int deviceIndex = Integer.valueOf(message.split(":")[1].substring(0, 1));
 
         log.info("切换串口：" + deviceIndex);
 
