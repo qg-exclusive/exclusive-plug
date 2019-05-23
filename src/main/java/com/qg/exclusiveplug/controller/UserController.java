@@ -2,7 +2,6 @@ package com.qg.exclusiveplug.controller;
 
 import com.qg.exclusiveplug.dtos.InteractionData;
 import com.qg.exclusiveplug.dtos.ResponseData;
-import com.qg.exclusiveplug.exception.RequestLimit;
 import com.qg.exclusiveplug.service.AccessLimitService;
 import com.qg.exclusiveplug.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -20,7 +19,6 @@ import javax.servlet.http.HttpSession;
 @RestController
 @CrossOrigin
 @RequestMapping("/user")
-@RequestLimit()
 @Slf4j
 public class UserController {
 

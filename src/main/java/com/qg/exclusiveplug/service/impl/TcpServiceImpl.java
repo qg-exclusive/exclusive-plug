@@ -73,8 +73,7 @@ public class TcpServiceImpl implements TcpService {
 
             Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
             // 向数据挖掘端发送设备信息
-//            int status = sendDeviceToDM(device);
-            int status = 0;
+            int status = sendDeviceToDM(device);
             // 更新待机信息
             try {
                 standBy(device, status);

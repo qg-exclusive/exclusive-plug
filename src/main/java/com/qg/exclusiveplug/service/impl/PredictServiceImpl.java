@@ -56,7 +56,7 @@ public class PredictServiceImpl implements PredictService {
 
     @Override
     public ResponseData predictNowPowerSumService(String time, int index) {
-        if (index > THREE || index < ONE || !DateUtil.isTimeLegal(time)) {
+        if (index > THREE || index < ONE) {
             //参数有误
             log.error("前端传入参数有误");
             return new ResponseData(StatusEnum.PARAMETER_ERROR.getStatus(), null);

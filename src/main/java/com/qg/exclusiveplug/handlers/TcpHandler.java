@@ -142,8 +142,12 @@ public class TcpHandler extends SimpleChannelInboundHandler<String> {
     }
 
     public void send(Integer deviceIndex, String message) {
-        for(ChannelHandlerContext ctx : NettyChannelHolder.get(deviceIndex)) {
-            ctx.writeAndFlush(message);
+        List<ChannelHandlerContext> channelHandlerContextList = NettyChannelHolder.get(deviceIndex);
+        if (null != channelHandlerContextList && !channelHandlerContextList.isEmpty()) {
+            for(ChannelHandlerContext ctx : channelHandlerContextList) {
+                System.out.printf("asdasdasd" + ctx);
+                ctx.writeAndFlush(message);
+            }
         }
     }
 

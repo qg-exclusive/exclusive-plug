@@ -206,8 +206,13 @@ public class QueryDeviceServiceImpl implements QueryDeviceService {
             // 以天为单位
             String tableName = "device" + startTime.split(" ")[0].replaceAll("-", "");
             log.info("查询数据表：" + tableName);
-            powerSum = new PowerSum(startTime.split(" ")[1].split(":")[0],
-                    queryDeviceMapper.listPowerSum(deviceIndex, startTime, endTime, tableName));
+            try {
+                powerSum = new PowerSum(startTime.split(" ")[1].split(":")[0],
+                        queryDeviceMapper.listPowerSum(deviceIndex, startTime, endTime, tableName));
+            } catch (Exception e) {
+                log.info("查询过往数据中数据表不存在:{}", tableName);
+                powerSum = new PowerSum();
+            }
             log.info("设备号：" + deviceIndex + "开始时间：" + startTime + "结束时间：" + endTime + "查询数据：" + powerSum);
         } else {
             log.info("查询数据不符合格式,开始时间{}, 结束时间{}", startTime, endTime);

@@ -15,24 +15,10 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-*/
-/**
- * @author Chen
- * time 2018-10-02 17:24:21
- * description 定时提取出预测数据
- *//*
-
 @Configuration
 @Order(1)
 @Profile(value = "dev")
 public class BeforeStartup implements ApplicationRunner {
-
-    */
-/**
-     * 项目启动时运行
-     *
-     * @param args
-     *//*
 
     @Override
     public void run(ApplicationArguments args) {

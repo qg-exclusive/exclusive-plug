@@ -44,6 +44,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
         User user = (User) redisTemplate.opsForHash().get("spring:session:sessions:" + token, "sessionAttr:user");
 
         if (null == user) {
+            log.error("Websocket-->>Session已过期，断开连接");
             webSocketSession.close();
             return;
         }
@@ -52,6 +53,7 @@ public class MyWebSocketHandler implements WebSocketHandler {
 
         if (!FormatMatchingUtil.isDeviceIndex(message)) {
             log.error("Websocket-->>前端信息不符合格式，已断开连接");
+            removeWebSocketSession(integerIntegermap, webSocketSession);
             webSocketSession.close();
             return;
         }
@@ -82,6 +84,11 @@ public class MyWebSocketHandler implements WebSocketHandler {
     @Override
     public void handleTransportError(WebSocketSession webSocketSession,
                                      Throwable throwable) {
+        String token = (String) webSocketSession.getAttributes().get(String.valueOf(webSocketSession.getRemoteAddress()));
+
+        Map<Integer, Integer> integerIntegermap = ((User) redisTemplate.opsForHash().get("spring:session:sessions:" + token, "sessionAttr:user")).getIndexPrivilegeMap();
+
+        removeWebSocketSession(integerIntegermap, webSocketSession);
         log.info("{}连接出现异常", webSocketSession.getId());
     }
 
@@ -91,7 +98,6 @@ public class MyWebSocketHandler implements WebSocketHandler {
         String token = (String) webSocketSession.getAttributes().get(String.valueOf(webSocketSession.getRemoteAddress()));
 
         Map<Integer, Integer> integerIntegermap = ((User) redisTemplate.opsForHash().get("spring:session:sessions:" + token, "sessionAttr:user")).getIndexPrivilegeMap();
-
 
         removeWebSocketSession(integerIntegermap, webSocketSession);
         log.info("Socket会话结束，即将移除socket");
