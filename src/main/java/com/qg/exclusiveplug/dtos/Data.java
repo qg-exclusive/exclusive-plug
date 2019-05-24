@@ -5,6 +5,7 @@ import com.qg.exclusiveplug.model.*;
 
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author Chen
@@ -59,5 +60,7 @@ public class Data implements Serializable {
      * 设备被操作日志
      */
     List<DeviceLog> deviceLogList;
+
+    Map<Integer, Integer> deviceStatus;
 
 }

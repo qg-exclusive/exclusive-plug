@@ -10,6 +10,7 @@ import com.qg.exclusiveplug.dtos.InteractBigData;
 import com.qg.exclusiveplug.dtos.RequestData;
 import com.qg.exclusiveplug.dtos.ResponseData;
 import com.qg.exclusiveplug.handlers.MyWebSocketHandler;
+import com.qg.exclusiveplug.map.DeviceStatusHolder;
 import com.qg.exclusiveplug.map.LongWaitList;
 import com.qg.exclusiveplug.map.TimeMap;
 import com.qg.exclusiveplug.map.WebSocketHolder;
@@ -74,6 +75,8 @@ public class TcpServiceImpl implements TcpService {
             Device device = new Device(index, name, current, voltage, power, powerFactor, frequency, currentTime, cumulativePower);
             // 向数据挖掘端发送设备信息
             int status = sendDeviceToDM(device);
+
+            DeviceStatusHolder.put(device.getIndex(), status);
             // 更新待机信息
             try {
                 standBy(device, status);
@@ -128,6 +131,7 @@ public class TcpServiceImpl implements TcpService {
         data.setDevice(device);
         data.setStatus(status);
         data.setLongAwaitList(LongWaitList.getLongWaitList());
+        data.setDeviceStatus(DeviceStatusHolder.getMAP());
         ResponseData responseData = new ResponseData();
         responseData.setStatus(StatusEnum.NORMAL.getStatus());
         responseData.setData(data);
